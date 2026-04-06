@@ -2,8 +2,20 @@
 
 from __future__ import annotations
 
-import tomllib
+import sys
 from pathlib import Path
+from typing import List, Optional
+
+# tomllib is stdlib from Python 3.11; use the tomli backport on 3.9/3.10.
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(
+            "tomli is required on Python < 3.11: pip install tomli"
+        ) from exc
 
 DEFAULT_PRIORITY = [
     "llama_cpp",
@@ -17,7 +29,7 @@ DEFAULT_PRIORITY = [
 
 
 class PipelineConfig:
-    def __init__(self, ttl_days: int = 7, priority: list[str] | None = None):
+    def __init__(self, ttl_days: int = 7, priority: Optional[List[str]] = None):
         self.ttl_days = ttl_days
         self.priority = priority or DEFAULT_PRIORITY
 
