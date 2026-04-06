@@ -1,0 +1,789 @@
+# Known model metadata for willitrun
+# Fill in real values from official papers / model cards / verified measurements.
+#
+# ★ MANDATORY fields for estimation engine:
+#   parameters: int       — needed for memory fit check (params × bytes_per_precision)
+#   flops: int            — needed for Tier 2 FLOPs-based scaling
+#
+# Where to find values:
+#   Vision models:  Papers With Code (paperswithcode.com) → search model → "Model Size"
+#   LLMs:           Hugging Face (huggingface.co/{org}/{model}) → config.json
+#   YOLO:           Ultralytics docs (docs.ultralytics.com) → model comparison tables
+#
+# ============================================================
+# TEMPLATES — copy the right one when adding a new model
+# ============================================================
+#
+# --- Vision model (detection / classification / segmentation) ---
+# my-model:
+#   aliases: ["my-model", "MyModel"]
+#   model_type: detection              # detection | classification | segmentation | pose
+#   architecture: yolo                 # model family name
+#   default_input_size: "640x640"      # input resolution used for FLOPs measurement
+#   parameters:                        # total params, e.g. 3200000
+#   flops:                             # FLOPs at default_input_size, e.g. 8700000000
+#   weights_size_mb:                   # .pt file size in MB at FP32
+#
+# --- LLM ---
+# my-llm:
+#   aliases: ["my-llm"]
+#   model_type: llm
+#   architecture: llama
+#   parameters:                        # total params, e.g. 8000000000
+#   weights_size_mb:                   # FP32 weight file size in MB
+#   llm_config:                        # from HuggingFace config.json:
+#     hidden_size:                     #   "hidden_size"
+#     num_hidden_layers:               #   "num_hidden_layers"
+#     num_attention_heads:             #   "num_attention_heads"
+#     intermediate_size:               #   "intermediate_size"
+#     vocab_size:                      #   "vocab_size"
+#     max_position_embeddings:         #   "max_position_embeddings"
+#
+# --- Audio ---
+# my-audio-model:
+#   aliases: ["my-audio"]
+#   model_type: audio
+#   architecture: whisper
+#   parameters:
+#   flops:
+#
+# --- Image Generation ---
+# my-diffusion:
+#   aliases: ["my-diffusion"]
+#   model_type: image_generation
+#   architecture: diffusion
+#   default_input_size: "1024x1024"
+#   parameters:                        # total params (UNet + text encoder + VAE)
+#   weights_size_mb:
+
+# ============================================================
+# YOLO26 Family
+# Source: https://docs.ultralytics.com/models/yolo26/
+# ============================================================
+
+yolo26n:
+  aliases: ["yolo26n", "YOLO26n", "yolo26n.pt"]
+  model_type: detection
+  architecture: yolo26
+  default_input_size: "640x640"
+  parameters: 2400000
+  flops: 5400000000
+  weights_size_mb: 9.6
+
+yolo26s:
+  aliases: ["yolo26s", "YOLO26s", "yolo26s.pt"]
+  model_type: detection
+  architecture: yolo26
+  default_input_size: "640x640"
+  parameters: 9500000
+  flops: 20700000000
+  weights_size_mb: 38.0
+
+yolo26m:
+  aliases: ["yolo26m", "YOLO26m", "yolo26m.pt"]
+  model_type: detection
+  architecture: yolo26
+  default_input_size: "640x640"
+  parameters: 20400000
+  flops: 68200000000
+  weights_size_mb: 81.6
+
+yolo26l:
+  aliases: ["yolo26l", "YOLO26l", "yolo26l.pt"]
+  model_type: detection
+  architecture: yolo26
+  default_input_size: "640x640"
+  parameters: 24800000
+  flops: 86400000000
+  weights_size_mb: 99.2
+
+yolo26x:
+  aliases: ["yolo26x", "YOLO26x", "yolo26x.pt"]
+  model_type: detection
+  architecture: yolo26
+  default_input_size: "640x640"
+  parameters: 55700000
+  flops: 193900000000
+  weights_size_mb: 222.8
+
+# ============================================================
+# YOLOv8 Family
+# Source: https://docs.ultralytics.com/models/yolov8/
+# ============================================================
+
+yolov8n:
+  aliases: ["yolov8n", "yolov8n.pt", "yolov8-nano"]
+  model_type: detection
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 3200000
+  flops: 8700000000
+  weights_size_mb: 12.8
+
+yolov8s:
+  aliases: ["yolov8s", "yolov8s.pt", "yolov8-small"]
+  model_type: detection
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 11200000
+  flops: 28600000000
+  weights_size_mb: 44.8
+
+yolov8m:
+  aliases: ["yolov8m", "yolov8m.pt", "yolov8-medium"]
+  model_type: detection
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 25900000
+  flops: 78900000000
+  weights_size_mb: 103.6
+
+yolov8l:
+  aliases: ["yolov8l", "yolov8l.pt", "yolov8-large"]
+  model_type: detection
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 43700000
+  flops: 165200000000
+  weights_size_mb: 174.8
+
+yolov8x:
+  aliases: ["yolov8x", "yolov8x.pt", "yolov8-xlarge"]
+  model_type: detection
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 68200000
+  flops: 257800000000
+  weights_size_mb: 272.8
+
+# ============================================================
+# YOLO11 Family
+# Source: https://docs.ultralytics.com/models/yolo11/
+# Parameters and FLOPs from Ultralytics COCO detection table
+# ============================================================
+
+yolo11n:
+  aliases: ["yolo11n", "YOLO11n", "yolo11n.pt"]
+  model_type: detection
+  architecture: yolo11
+  default_input_size: "640x640"
+  parameters: 2600000
+  flops: 6500000000
+  weights_size_mb: 10.4
+
+yolo11s:
+  aliases: ["yolo11s", "YOLO11s", "yolo11s.pt"]
+  model_type: detection
+  architecture: yolo11
+  default_input_size: "640x640"
+  parameters: 9400000
+  flops: 21500000000
+  weights_size_mb: 37.6
+
+yolo11m:
+  aliases: ["yolo11m", "YOLO11m", "yolo11m.pt"]
+  model_type: detection
+  architecture: yolo11
+  default_input_size: "640x640"
+  parameters: 20100000
+  flops: 68000000000
+  weights_size_mb: 80.4
+
+yolo11l:
+  aliases: ["yolo11l", "YOLO11l", "yolo11l.pt"]
+  model_type: detection
+  architecture: yolo11
+  default_input_size: "640x640"
+  parameters: 25300000
+  flops: 86900000000
+  weights_size_mb: 101.2
+
+yolo11x:
+  aliases: ["yolo11x", "YOLO11x", "yolo11x.pt"]
+  model_type: detection
+  architecture: yolo11
+  default_input_size: "640x640"
+  parameters: 56900000
+  flops: 194900000000
+  weights_size_mb: 227.6
+
+yolov8n-seg:
+  aliases: ["yolov8n-seg", "yolov8n-seg.pt"]
+  model_type: segmentation
+  architecture: yolov8
+  default_input_size: "640x640"
+  parameters: 3400000
+  flops: 9000000000
+  weights_size_mb: 13.6
+
+# ============================================================
+# Classification Models
+# Source: Papers With Code, torchvision docs
+# ============================================================
+
+resnet50:
+  aliases: ["resnet50", "resnet-50", "ResNet50", "ResNet"]
+  model_type: classification
+  architecture: resnet
+  default_input_size: "224x224"
+  parameters: 25557032
+  flops: 4090000000
+  weights_size_mb: 97.8
+
+mobilenetv2:
+  aliases: ["mobilenetv2", "mobilenet-v2", "MobileNetV2", "mobilenet_v2"]
+  model_type: classification
+  architecture: mobilenet
+  default_input_size: "224x224"
+  parameters: 3504872
+  flops: 300000000
+  weights_size_mb: 13.6
+
+efficientnet-b0:
+  aliases: ["efficientnet-b0", "efficientnet_b0", "EfficientNet-B0"]
+  model_type: classification
+  architecture: efficientnet
+  default_input_size: "224x224"
+  parameters: 5288548
+  flops: 390000000
+  weights_size_mb: 20.5
+
+vit-base-patch16-224:
+  aliases: ["vit-base-patch16-224", "vit-base", "ViT-B/16"]
+  model_type: classification
+  architecture: vit
+  default_input_size: "224x224"
+  parameters: 86600000
+  flops: 17600000000
+  weights_size_mb: 330
+
+# ============================================================
+# Detection (non-YOLO)
+# ============================================================
+
+retinanet:
+  aliases: ["retinanet", "RetinaNet"]
+  model_type: detection
+  architecture: retinanet
+  default_input_size: "800x800"
+  parameters: 34014999
+  flops: 151540000000
+  weights_size_mb: 130.3
+
+# ============================================================
+# Segmentation / Other Vision
+# ============================================================
+
+segment-anything/vit-h:
+  aliases: ["sam-vit-h", "segment-anything-vit-h", "SAM-H", "segment-anything/vit-h"]
+  model_type: segmentation
+  architecture: vit
+  default_input_size: "1024x1024"
+  parameters: 632000000
+  flops: 3000000000000
+  weights_size_mb: 2500
+
+3d-unet:
+  aliases: ["3d-unet", "3D-UNet"]
+  model_type: segmentation
+  architecture: unet
+  parameters: 20000000
+  flops: 250000000000
+  weights_size_mb: 80
+
+# ============================================================
+# Audio
+# ============================================================
+
+rnnt:
+  aliases: ["rnnt", "rnn-t", "RNN-T"]
+  model_type: audio
+  architecture: rnnt
+  parameters:
+  flops:
+
+openai/whisper-large-v3:
+  aliases: ["my-audio", "whisper-large-v3"]
+  model_type: audio
+  architecture: whisper
+  parameters: 1541693440
+  flops: 3371300290560
+
+# ============================================================
+# LLMs
+# Source: HuggingFace config.json for each model
+#   → huggingface.co/{org}/{model}/blob/main/config.json
+# ============================================================
+
+llama-2-7b:
+  aliases: ["llama-2-7b", "Llama-2-7B", "llama2-7b", "meta-llama/Llama-2-7b-hf"]
+  model_type: llm
+  architecture: llama
+  parameters: 6738000000
+  weights_size_mb: 13500
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    intermediate_size: 16384
+    vocab_size: 32000
+    max_position_embeddings: 4096
+
+meta-llama/Llama-3-8B:
+  aliases: ["llama-3-8b", "Llama-3-8B", "meta-llama/Llama-3-8B", "meta-llama/Meta-Llama-3-8B"]
+  model_type: llm
+  architecture: llama
+  parameters: 8030000000
+  weights_size_mb: 16060
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    intermediate_size: 14336
+    vocab_size: 128256
+    max_position_embeddings: 8192
+
+meta-llama/Llama-3.1-8B:
+  aliases: ["llama-3.1-8b", "Llama-3.1-8B", "meta-llama/Llama-3.1-8B", "llama-3.1-8b-instruct"]
+  model_type: llm
+  architecture: llama
+  parameters: 8030261248      # identical architecture to Llama-3-8B, 128K context window
+  weights_size_mb: 16061
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+meta-llama/Llama-3-70B:
+  aliases: ["llama-3-70b", "Llama-3-70B", "meta-llama/Llama-3-70B", "meta-llama/Meta-Llama-3-70B"]
+  model_type: llm
+  architecture: llama
+  parameters: 70553706496
+  weights_size_mb: 134316
+  llm_config:
+    hidden_size: 8192
+    num_hidden_layers: 80
+    num_attention_heads: 64
+    intermediate_size: 28672
+    vocab_size: 128256
+    max_position_embeddings: 8192
+
+meta-llama/Llama-3.3-70B:
+  aliases: ["llama-3.3-70b", "Llama-3.3-70B", "meta-llama/Llama-3.3-70B", "llama-3.3-70b-instruct"]
+  model_type: llm
+  architecture: llama
+  parameters: 70553706496     # same architecture as Llama-3-70B
+  weights_size_mb: 141108     # FP16
+  llm_config:
+    hidden_size: 8192
+    num_hidden_layers: 80
+    num_attention_heads: 64
+    num_key_value_heads: 8
+    intermediate_size: 28672
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+meta-llama/Llama-3.2-11B-Vision:
+  aliases: ["llama-3.2-11b-vision", "meta-llama/Llama-3.2-11B-Vision", "llama-3.2-11b"]
+  model_type: llm
+  architecture: llama
+  parameters: 10673053696     # 8B text + 3B vision encoder
+  weights_size_mb: 21346
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+meta-llama/Llama-3.2-3B:
+  aliases: ["llama-3.2-3b", "Llama-3.2-3B", "meta-llama/Llama-3.2-3B", "llama-3.2-3b-instruct"]
+  model_type: llm
+  architecture: llama
+  parameters: 3212749824
+  weights_size_mb: 6426
+  llm_config:
+    hidden_size: 3072
+    num_hidden_layers: 28
+    num_attention_heads: 24
+    num_key_value_heads: 8
+    intermediate_size: 8192
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+meta-llama/Llama-3.2-1B:
+  aliases: ["llama-3.2-1b", "Llama-3.2-1B", "meta-llama/Llama-3.2-1B", "llama-3.2-1b-instruct"]
+  model_type: llm
+  architecture: llama
+  parameters: 1235814400
+  weights_size_mb: 2472
+  llm_config:
+    hidden_size: 2048
+    num_hidden_layers: 16
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 8192
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+meta-llama/Llama-3.2-90B-Vision:
+  aliases: ["llama-3.2-90b", "llama-3.2-90b-vision", "meta-llama/Llama-3.2-90B-Vision"]
+  model_type: llm
+  architecture: llama
+  parameters: 88837521408
+  weights_size_mb: 177675
+  llm_config:
+    hidden_size: 8192
+    num_hidden_layers: 80
+    num_attention_heads: 64
+    num_key_value_heads: 8
+    intermediate_size: 28672
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+mistralai/Mistral-7B-v0.3:
+  aliases: ["mistral-7b", "mistral-7b-v0.3", "mistralai/Mistral-7B-v0.3", "mistral-7b-instruct"]
+  model_type: llm
+  architecture: mistral
+  parameters: 7248023552
+  weights_size_mb: 14496
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 32768
+    max_position_embeddings: 32768
+
+mistralai/Mixtral-8x7B:
+  aliases: ["mixtral-8x7b", "Mixtral-8x7B", "mistralai/Mixtral-8x7B", "mixtral-8x7b-instruct"]
+  model_type: llm
+  architecture: mistral
+  parameters: 46702792704   # 8 experts × 7B, 2 active per token
+  weights_size_mb: 93406
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 32000
+    max_position_embeddings: 32768
+
+microsoft/Phi-3-mini-4k:
+  aliases: ["phi-3-mini", "phi3-mini", "microsoft/Phi-3-mini-4k-instruct", "phi-3-mini-4k"]
+  model_type: llm
+  architecture: phi3
+  parameters: 3821079552
+  weights_size_mb: 7642
+  llm_config:
+    hidden_size: 3072
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 32
+    intermediate_size: 8192
+    vocab_size: 32064
+    max_position_embeddings: 4096
+
+microsoft/Phi-3.5-mini:
+  aliases: ["phi-3.5-mini", "phi3.5-mini", "microsoft/Phi-3.5-mini-instruct", "phi-3.5-mini-instruct"]
+  model_type: llm
+  architecture: phi3
+  parameters: 3821079552
+  weights_size_mb: 7642
+  llm_config:
+    hidden_size: 3072
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 32
+    intermediate_size: 8192
+    vocab_size: 32064
+    max_position_embeddings: 131072
+
+microsoft/Phi-4:
+  aliases: ["phi-4", "phi4", "microsoft/phi-4"]
+  model_type: llm
+  architecture: phi4
+  parameters: 14659266560
+  weights_size_mb: 29319
+  llm_config:
+    hidden_size: 5120
+    num_hidden_layers: 40
+    num_attention_heads: 40
+    num_key_value_heads: 10
+    intermediate_size: 17920
+    vocab_size: 100352
+    max_position_embeddings: 16384
+
+google/gemma-2-2b:
+  aliases: ["gemma-2-2b", "gemma2-2b", "google/gemma-2-2b", "google/gemma-2-2b-it"]
+  model_type: llm
+  architecture: gemma2
+  parameters: 2614341632
+  weights_size_mb: 5229
+  llm_config:
+    hidden_size: 2304
+    num_hidden_layers: 26
+    num_attention_heads: 8
+    num_key_value_heads: 4
+    intermediate_size: 9216
+    vocab_size: 256000
+    max_position_embeddings: 8192
+
+google/gemma-2-9b:
+  aliases: ["gemma-2-9b", "gemma2-9b", "google/gemma-2-9b", "google/gemma-2-9b-it"]
+  model_type: llm
+  architecture: gemma2
+  parameters: 9241705472
+  weights_size_mb: 18483
+  llm_config:
+    hidden_size: 3584
+    num_hidden_layers: 42
+    num_attention_heads: 16
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 256000
+    max_position_embeddings: 8192
+
+google/gemma-3-4b:
+  aliases: ["gemma-3-4b", "gemma3-4b", "google/gemma-3-4b", "google/gemma-3-4b-it"]
+  model_type: llm
+  architecture: gemma3
+  parameters: 4299120640
+  weights_size_mb: 8598
+  llm_config:
+    hidden_size: 2560
+    num_hidden_layers: 34
+    num_attention_heads: 8
+    num_key_value_heads: 4
+    intermediate_size: 10240
+    vocab_size: 262144
+    max_position_embeddings: 131072
+
+google/gemma-3-12b:
+  aliases: ["gemma-3-12b", "gemma3-12b", "google/gemma-3-12b", "google/gemma-3-12b-it"]
+  model_type: llm
+  architecture: gemma3
+  parameters: 12194742272
+  weights_size_mb: 24390
+  llm_config:
+    hidden_size: 3840
+    num_hidden_layers: 40
+    num_attention_heads: 16
+    num_key_value_heads: 8
+    intermediate_size: 15360
+    vocab_size: 262144
+    max_position_embeddings: 131072
+
+Qwen/Qwen2.5-7B:
+  aliases: ["qwen2.5-7b", "Qwen2.5-7B", "Qwen/Qwen2.5-7B", "qwen2.5-7b-instruct"]
+  model_type: llm
+  architecture: qwen2
+  parameters: 7615616000
+  weights_size_mb: 15231
+  llm_config:
+    hidden_size: 3584
+    num_hidden_layers: 28
+    num_attention_heads: 28
+    num_key_value_heads: 4
+    intermediate_size: 18944
+    vocab_size: 152064
+    max_position_embeddings: 131072
+
+Qwen/Qwen2.5-14B:
+  aliases: ["qwen2.5-14b", "Qwen2.5-14B", "Qwen/Qwen2.5-14B", "qwen2.5-14b-instruct"]
+  model_type: llm
+  architecture: qwen2
+  parameters: 14771978240
+  weights_size_mb: 29544
+  llm_config:
+    hidden_size: 5120
+    num_hidden_layers: 48
+    num_attention_heads: 40
+    num_key_value_heads: 8
+    intermediate_size: 13824
+    vocab_size: 152064
+    max_position_embeddings: 131072
+
+Qwen/Qwen2.5-32B:
+  aliases: ["qwen2.5-32b", "Qwen2.5-32B", "Qwen/Qwen2.5-32B", "qwen2.5-32b-instruct"]
+  model_type: llm
+  architecture: qwen2
+  parameters: 32763551744
+  weights_size_mb: 65527
+  llm_config:
+    hidden_size: 5120
+    num_hidden_layers: 64
+    num_attention_heads: 40
+    num_key_value_heads: 8
+    intermediate_size: 27648
+    vocab_size: 152064
+    max_position_embeddings: 131072
+
+Qwen/Qwen3-8B:
+  aliases: ["qwen3-8b", "Qwen3-8B", "Qwen/Qwen3-8B"]
+  model_type: llm
+  architecture: qwen3
+  parameters: 8196046848
+  weights_size_mb: 16392
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 36
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 151936
+    max_position_embeddings: 40960
+
+deepseek-ai/DeepSeek-R1-Distill-Llama-8B:
+  aliases: ["deepseek-r1-8b", "deepseek-r1-distill-8b", "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"]
+  model_type: llm
+  architecture: llama
+  parameters: 8030261248
+  weights_size_mb: 16061
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    num_key_value_heads: 8
+    intermediate_size: 14336
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+deepseek-ai/DeepSeek-R1-Distill-Llama-70B:
+  aliases: ["deepseek-r1-70b", "deepseek-r1-distill-70b", "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"]
+  model_type: llm
+  architecture: llama
+  parameters: 70553706496
+  weights_size_mb: 141108
+  llm_config:
+    hidden_size: 8192
+    num_hidden_layers: 80
+    num_attention_heads: 64
+    num_key_value_heads: 8
+    intermediate_size: 28672
+    vocab_size: 128256
+    max_position_embeddings: 131072
+
+Qwen/Qwen3-30B-A3B:
+  aliases: ["qwen3-30b-a3b", "Qwen/Qwen3-30B-A3B"]
+  model_type: llm
+  architecture: qwen
+  parameters: 30532108288
+  weights_size_mb: 61064
+  llm_config:
+    hidden_size: 2048
+    num_hidden_layers: 48
+    num_attention_heads: 32
+    intermediate_size: 6144
+    vocab_size: 151936
+    max_position_embeddings: 40960
+
+Qwen/Qwen2.5-VL-3B:
+  aliases: ["qwen2.5-vl-3b", "Qwen/Qwen2.5-VL-3B"]
+  model_type: llm
+  architecture: qwen
+  parameters: 3000000000
+  weights_size_mb: 6000
+  llm_config:
+    hidden_size: 2048
+    num_hidden_layers: 36
+    num_attention_heads: 16
+    intermediate_size: 11008
+    vocab_size: 151936
+    max_position_embeddings: 128000
+
+deepseek-ai/DeepSeek-R1-Distill-Qwen-7B:
+  aliases: ["deepseek-r1-distill-qwen-7b", "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"]
+  model_type: llm
+  architecture: qwen
+  parameters: 7000000000
+  weights_size_mb: 14000
+  llm_config:
+    hidden_size: 3584
+    num_hidden_layers: 28
+    num_attention_heads: 28
+    intermediate_size: 18944
+    vocab_size: 152064
+    max_position_embeddings: 131072
+
+deepseek-ai/DeepSeek-R1-7B:
+  aliases: ["deepseek-r1-7b", "deepseek-ai/DeepSeek-R1-7B"]
+  model_type: llm
+  architecture: deepseek
+  parameters: 7000000000
+
+microsoft/phi-2:
+  aliases: ["phi-2", "microsoft/phi-2", "Phi-2"]
+  model_type: llm
+  architecture: phi
+  parameters: 2700000000
+  weights_size_mb: 5400
+  llm_config:
+    hidden_size: 2560
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    intermediate_size: 10240
+    vocab_size: 51200
+    max_position_embeddings: 2048
+
+mistralai/Mistral-7B-v0.1:
+  aliases: ["mistral-7b", "Mistral-7B", "mistralai/Mistral-7B-v0.1"]
+  model_type: llm
+  architecture: mistral
+  parameters: 7240000000
+  weights_size_mb: 14480
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 32
+    num_attention_heads: 32
+    intermediate_size: 14336
+    vocab_size: 32000
+    max_position_embeddings: 32768
+
+gpt-j-6b:
+  aliases: ["gpt-j-6b", "gpt-j", "GPT-J-6B"]
+  model_type: llm
+  architecture: gptj
+  parameters: 6000000000
+  weights_size_mb: 12000
+  llm_config:
+    hidden_size: 4096
+    num_hidden_layers: 28
+    num_attention_heads: 16
+    intermediate_size: 16384
+    vocab_size: 50400
+    max_position_embeddings: 2048
+
+bert-base:
+  aliases: ["bert-base", "bert", "BERT"]
+  model_type: llm
+  architecture: bert
+  parameters: 110000000
+  weights_size_mb: 440
+  llm_config:
+    hidden_size: 768
+    num_hidden_layers: 12
+    num_attention_heads: 12
+    intermediate_size: 3072
+    vocab_size: 30522
+    max_position_embeddings: 512
+
+# ============================================================
+# Image Generation
+# ============================================================
+
+sdxl:
+  aliases: ["sdxl", "stable-diffusion-xl", "SDXL"]
+  model_type: image_generation
+  architecture: diffusion
+  default_input_size: "1024x1024"
+  parameters:
+  weights_size_mb:

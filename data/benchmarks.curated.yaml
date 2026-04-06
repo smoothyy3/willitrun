@@ -1,0 +1,7 @@
+# Curated benchmark results for willitrun
+# These are hand-verified records that override auto-ingested data.
+# Add entries here only after manual verification.
+#
+# Currently empty — all data comes from automated ingestion.
+# To add curated records, follow the BenchmarkRecord schema in willitrun/schemas.py.
+[]

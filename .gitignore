@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+*.so
+.env
+.venv/
+venv/
+.DS_Store
+
+# Legacy build artifacts
+data/benchmarks.generated.yaml

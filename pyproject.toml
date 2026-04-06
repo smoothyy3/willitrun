@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "willitrun"
+version = "0.1.2"
+description = "Will your ML model run on your device? Find out in one command."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Jonas" }]
+keywords = ["machine-learning", "inference", "benchmark", "gpu", "edge-ai", "jetson", "deployment"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "click>=8.0",
+    "rich>=13.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "questionary>=2.0",
+    "huggingface-hub>=0.16",
+]
+
+[project.optional-dependencies]
+profiling = [
+    "torch>=2.0",
+    "thop>=0.1",
+]
+onnx = [
+    "onnx>=1.14",
+]
+all = [
+    "willitrun[profiling,onnx]",
+]
+ingestion = [
+    "requests>=2.28",
+    "beautifulsoup4>=4.12",
+    "pandas>=2.0",
+    "lxml>=4.9",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "willitrun[ingestion]",
+]
+
+[project.scripts]
+willitrun = "willitrun.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jonas/willitrun"
+Issues = "https://github.com/jonas/willitrun/issues"
+
+[tool.setuptools.packages.find]
+include = ["willitrun*"]
+
+[tool.setuptools.package-data]
+# data/ lives inside the willitrun package so pip/pipx installs work correctly.
+# During development the data/ directory at the repo root is the source of truth;
+# sync it to willitrun/data/ before building a release wheel.
+willitrun = ["data/*.yaml", "data/*.db", "data/*.json"]
+
+[tool.willitrun]
+raw_ttl_days = 7
+source_priority = ["llama_cpp", "mlperf", "nvidia_jetson", "ultralytics", "ultralytics_gpu", "xiongjieddai", "curated"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
