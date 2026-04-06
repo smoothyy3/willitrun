@@ -69,3 +69,8 @@ class Model(BaseModel):
 def unique_benchmark_key(source: str, model_id: str, device_id: str, precision: str, metric: str) -> str:
     """Deterministic benchmark_id helper."""
     return f"{source}_{model_id}_{device_id}_{precision}_{metric}"
+
+
+# Alias used by ingest scripts — keeps their imports stable as the module
+# name evolves.  New scripts should call unique_benchmark_key() directly.
+make_benchmark_id = unique_benchmark_key

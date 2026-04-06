@@ -34,7 +34,7 @@ NORMALIZED_DIR = DATA_ROOT / "normalized"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from willitrun.schemas import make_benchmark_id
+from willitrun.pipeline.schema import make_benchmark_id
 
 NVIDIA_URL = "https://developer.nvidia.com/embedded/jetson-benchmarks"
 

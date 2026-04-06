@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -15,13 +16,15 @@ DATA_RAW = ROOT / "data" / "raw"
 NORMALIZED_DIR = ROOT / "data" / "normalized"
 
 
+SCRIPTS_DIR = ROOT / "scripts"
+
 SOURCES = {
-    "ultralytics": "scripts/ingest_ultralytics.py",
-    "ultralytics_gpu": "scripts/ingest_ultralytics_gpu.py",
-    "nvidia_jetson": "scripts/ingest_nvidia_jetson.py",
-    "mlperf": "scripts/ingest_mlperf.py",
-    "llama_cpp": "scripts/ingest_llama_cpp.py",
-    "xiongjieddai": "scripts/ingest_xiongjieddai.py",
+    "ultralytics": SCRIPTS_DIR / "ingest_ultralytics.py",
+    "ultralytics_gpu": SCRIPTS_DIR / "ingest_ultralytics_gpu.py",
+    "nvidia_jetson": SCRIPTS_DIR / "ingest_nvidia_jetson.py",
+    "mlperf": SCRIPTS_DIR / "ingest_mlperf.py",
+    "llama_cpp": SCRIPTS_DIR / "ingest_llama_cpp.py",
+    "xiongjieddai": SCRIPTS_DIR / "ingest_xiongjieddai.py",
 }
 
 
@@ -43,12 +46,12 @@ def run_fetch(cfg) -> None:
         if age is not None and age < cfg.ttl_days:
             print(f"[fetch] {source}: cache hit, skipping fetch ({age:.1f} days old)")
             continue
-        print(f"[fetch] {source}: running {script}")
-        subprocess.run(["python", script], check=True)
+        print(f"[fetch] {source}: running {script.name}")
+        subprocess.run([sys.executable, str(script)], check=True)
 
 
 def run_build() -> None:
-    subprocess.run(["python", "scripts/build_db.py"], check=True)
+    subprocess.run([sys.executable, str(SCRIPTS_DIR / "build_db.py")], check=True)
 
 
 def run_status() -> None:

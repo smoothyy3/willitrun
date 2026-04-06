@@ -32,7 +32,7 @@ NORMALIZED_DIR = DATA_ROOT / "normalized"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from willitrun.schemas import make_benchmark_id
+from willitrun.pipeline.schema import make_benchmark_id
 
 README_URL = "https://raw.githubusercontent.com/XiongjieDai/GPU-Benchmarks-on-LLM-Inference/main/README.md"
 SOURCE_URL = "https://github.com/XiongjieDai/GPU-Benchmarks-on-LLM-Inference"
