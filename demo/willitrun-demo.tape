@@ -20,7 +20,7 @@ Down
 Sleep 100ms
 Enter
 
-Sleep 1000ms
+Sleep 2000ms
 Type "rtx"
 Sleep 1000ms
 
