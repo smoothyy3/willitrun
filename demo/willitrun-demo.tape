@@ -13,10 +13,14 @@ Sleep 1500ms
 Type "llama"
 Sleep 500ms
 Down
+Sleep 100ms
 Down
+Sleep 100ms
 Down
+Sleep 100ms
 Enter
 
+Sleep 1000ms
 Type "rtx"
 Sleep 1000ms
 
