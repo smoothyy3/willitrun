@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "willitrun"
-version = "0.1.2"
+version = "0.1.3"
 description = "Will your ML model run on your device? Find out in one command."
 readme = "README.md"
 license = "MIT"

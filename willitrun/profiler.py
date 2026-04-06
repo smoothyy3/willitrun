@@ -22,6 +22,7 @@ class ModelProfile:
     # Computed memory estimates (bytes)
     memory_fp32: int | None = None
     memory_fp16: int | None = None
+    memory_fp8: int | None = None
     memory_int8: int | None = None
     memory_4bit: int | None = None
 
@@ -62,8 +63,10 @@ class ModelProfile:
             "fp32": self.memory_fp32,
             "fp16": self.memory_fp16,
             "bf16": self.memory_fp16,
+            "fp8": self.memory_fp8,
             "int8": self.memory_int8,
             "4bit": self.memory_4bit,
+            "int4": self.memory_4bit,
         }
         return mapping.get(precision)
 
@@ -85,6 +88,7 @@ def profile_model(model_info: ModelInfo) -> ModelProfile:
     # Compute memory estimates
     memory_fp32 = params * 4 if params else None
     memory_fp16 = params * 2 if params else None
+    memory_fp8 = params * 1 if params else None
     memory_int8 = params * 1 if params else None
     memory_4bit = int(params * 0.5) if params else None
 
@@ -98,6 +102,7 @@ def profile_model(model_info: ModelInfo) -> ModelProfile:
         llm_config=model_info.llm_config,
         memory_fp32=memory_fp32,
         memory_fp16=memory_fp16,
+        memory_fp8=memory_fp8,
         memory_int8=memory_int8,
         memory_4bit=memory_4bit,
         source=model_info.source,

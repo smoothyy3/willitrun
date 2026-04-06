@@ -246,7 +246,7 @@ def tier2_estimate(
     where strategy: 1=FLOPs/same-device, 2=TFLOPS/same-model, 3=rough
     """
     if profile.flops is None and profile.parameters is None:
-        return None, None, None, "Insufficient model info for estimation", 0
+        return None, None, None, "Insufficient model info for estimation (need FLOPs or parameters)", 0
 
     device_spec = devices.get(device_id)
     if device_spec is None:
@@ -254,6 +254,8 @@ def tier2_estimate(
 
     is_llm = (profile.model_type == "llm")
     device_tflops = get_best_tflops(device_spec)
+    if device_tflops == 0 and not is_llm:
+        return None, None, None, "Device TFLOPS unknown; cannot scale performance", 0
 
     def _is_valid_ref(b: BenchmarkResult) -> bool:
         """For LLMs, only use tg benchmarks as scaling references."""
@@ -287,9 +289,10 @@ def tier2_estimate(
             llm_refs.sort(key=lambda x: abs(x[1] - profile.parameters))
             ref_bench, ref_params = llm_refs[0]
             scale = ref_params / profile.parameters
+            scale = min(max(scale, 0.05), 20)
             est = ref_bench.value * scale
-            low = est * 0.7
-            high = est * 1.3
+            low = est * 0.6
+            high = est * 1.4
             notes = (
                 f"Scaled from {ref_bench.model} ({ref_bench.value:.0f} {ref_bench.metric}) "
                 f"on same device by parameter ratio ({ref_params/1e9:.1f}B / {profile.parameters/1e9:.1f}B)"
@@ -322,6 +325,7 @@ def tier2_estimate(
         if best_ref:
             ref_bench, ref_flops = best_ref
             scale = ref_flops / profile.flops
+            scale = min(max(scale, 0.1), 10)
             est = ref_bench.value * scale
             low = est * 0.7
             high = est * 1.3
@@ -351,10 +355,11 @@ def tier2_estimate(
         dev_bw = device_spec.get("memory", {}).get("bandwidth_gbps") or 1
         bw_factor = min(dev_bw / ref_bw, scale)
         combined_scale = (scale + bw_factor) / 2
+        combined_scale = min(max(combined_scale, 0.1), 10)
 
         est = b.value * combined_scale
         low = est * 0.6
-        high = est * 1.4
+        high = est * 1.5
         notes = (
             f"Scaled from {b.device} ({b.value:.0f} {b.metric}) "
             f"by TFLOPS ratio ({device_tflops:.1f} / {ref_tflops:.1f}) "
@@ -373,9 +378,10 @@ def tier2_estimate(
             if ref_key and models_db.get(ref_key, {}).get("flops"):
                 ref_flops = models_db[ref_key]["flops"]
                 scale = ref_flops / profile.flops
+                scale = min(max(scale, 0.1), 10)
                 est = b.value * scale
                 low = est * 0.5
-                high = est * 1.5
+                high = est * 1.6
                 notes = (
                     f"Rough estimate scaled from {b.model} on same device. "
                     f"Different model architecture — treat with caution."
@@ -408,7 +414,7 @@ def estimate(profile: ModelProfile, device_id: str) -> Estimate:
     # Build memory info
     memory_human = {}
     memory_bytes = {}
-    for prec in ["fp32", "fp16", "int8", "4bit"]:
+    for prec in ["fp32", "fp16", "bf16", "fp8", "int8", "4bit", "int4"]:
         mem_str = profile.memory_human(prec)
         if mem_str != "Unknown":
             memory_human[prec] = mem_str
