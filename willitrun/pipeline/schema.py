@@ -8,7 +8,7 @@ keep the dataset reproducible and append‑friendly.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
@@ -28,7 +28,7 @@ class BenchmarkRecord(BaseModel):
     metric: Metric
     value: float = Field(gt=0)
     framework: str
-    source_url: HttpUrl | str
+    source_url: Union[HttpUrl, str]
     source_name: str
     confidence: Confidence
     collected_at: datetime
@@ -44,26 +44,26 @@ class BenchmarkRecord(BaseModel):
 
 class Device(BaseModel):
     device_id: str
-    name: str | None = None
-    gpu: dict | None = None
-    cpu: dict | None = None
-    memory: dict | None = None
-    memory_gb: float | None = None
-    notes: str | None = None
+    name: Optional[str] = None
+    gpu: Optional[Dict] = None
+    cpu: Optional[Dict] = None
+    memory: Optional[Dict] = None
+    memory_gb: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class Model(BaseModel):
     model_id: str
-    name: str | None = None
-    aliases: list[str] | None = None
-    model_type: str | None = None
-    parameters: int | None = None
-    flops: int | None = None
-    default_input_size: str | None = None
-    architecture: str | None = None
-    weights_size_mb: float | None = None
-    llm_config: dict | None = None
-    notes: str | None = None
+    name: Optional[str] = None
+    aliases: Optional[List[str]] = None
+    model_type: Optional[str] = None
+    parameters: Optional[int] = None
+    flops: Optional[int] = None
+    default_input_size: Optional[str] = None
+    architecture: Optional[str] = None
+    weights_size_mb: Optional[float] = None
+    llm_config: Optional[Dict] = None
+    notes: Optional[str] = None
 
 
 def unique_benchmark_key(source: str, model_id: str, device_id: str, precision: str, metric: str) -> str:
