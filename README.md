@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/willitrun)](https://pypi.org/project/willitrun/)
 [![Python versions](https://img.shields.io/pypi/pyversions/willitrun)](https://pypi.org/project/willitrun/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/jonas/willitrun/ci.yml?branch=main)](https://github.com/jonas/willitrun/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/smoothyy3/willitrun/ci.yml?branch=main)](https://github.com/smoothyy3/willitrun/actions)
 
 > CLI to tell you if an ML model will fit and run on your device, using real benchmarks + lightweight estimation.
 
