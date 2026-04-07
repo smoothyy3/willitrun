@@ -1517,6 +1517,25 @@ apple-m4-max-36gb:
   supported_precisions: [fp32, fp16, int8, 4bit]
   supported_runtimes: [pytorch, coreml, onnxruntime, llama.cpp, mlc-llm]
 
+apple-m5-32gb:
+  name: "Apple M5 32GB"
+  vendor: apple
+  device_family: m5
+  type: soc
+  gpu:
+    name: "Apple GPU"
+    cores: 10
+    tflops_fp16: 5.5            # estimated; M5 base ~30% uplift over M4 base 10-core
+  memory:
+    total_gb: 32
+    type: "LPDDR5X"
+    bandwidth_gbps: 120         # estimated; Apple has not published official figures
+    unified: true
+  tdp_watts: 30
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, coreml, onnxruntime, llama.cpp, mlc-llm, mlx]
+  notes: "MacBook Air M5 10-core GPU / 10-core CPU, 32 GB unified; specs estimated"
+
 apple-m5-max-64gb:
   name: "Apple M5 Max 64GB"
   vendor: apple

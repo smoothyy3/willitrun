@@ -364,14 +364,14 @@ class TestTier2LLMScaling:
         assert est.metric == "tok/s"
 
     def test_no_tier2_for_llm_on_vision_only_device(self):
-        """Mistral-7B on jetson-orin-nano-8gb — only has YOLO data, no LLM ref → no estimate."""
-        info = resolve_model("mistralai/Mistral-7B-v0.3")
+        """Mixtral-8x7B on jetson-orin-nano-8gb — no LLM benchmark data exists → no estimate."""
+        info = resolve_model("mistralai/Mixtral-8x7B")
         p = profile_model(info)
         est = estimate(p, "jetson-orin-nano-8gb")
 
         assert est.tier == 2
         assert est.tier2_strategy == 0, (
-            "Device with only vision benchmarks cannot provide an LLM scaling reference"
+            "No benchmark data for this model means no scaling reference is possible"
         )
         assert est.estimated_fps is None
 
@@ -520,9 +520,9 @@ class TestTier2StrategyLabels:
 
     def test_strategy_0_no_data(self):
         """Strategy 0 means no useful reference was found."""
-        info = resolve_model("mistralai/Mistral-7B-v0.3")
+        info = resolve_model("mistralai/Mixtral-8x7B")
         p = profile_model(info)
-        # jetson-orin-nano only has YOLO data — can't scale an LLM
+        # Mixtral-8x7B has no benchmark data anywhere — no scaling reference possible
         est = estimate(p, "jetson-orin-nano-8gb")
         assert est.tier2_strategy == 0
         assert est.estimated_fps is None

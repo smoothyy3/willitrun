@@ -29,6 +29,9 @@ def display_result(est: Estimate, rec: Recommendation) -> None:
 
     # Parameters
     params_str = est.parameters_human
+    if est.is_moe and est.active_params is not None:
+        active_b = est.active_params / 1_000_000_000
+        params_str += f" total  [dim]({active_b:.1f}B active per token)[/dim]"
     if est.model_source == "huggingface":
         params_str += "  [dim](estimated from HuggingFace config)[/dim]"
     table.add_row("Parameters:", params_str)

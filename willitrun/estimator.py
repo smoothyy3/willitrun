@@ -36,8 +36,10 @@ class Estimate:
     device_id: str
 
     # From profile
-    parameters: int | None = None
+    parameters: int | None = None        # total params (memory)
     parameters_human: str = "Unknown"
+    active_params: int | None = None     # active params per token (MoE speed scaling)
+    is_moe: bool = False
     flops: int | None = None
     flops_human: str = "Unknown"
     model_type: str | None = None
@@ -266,7 +268,12 @@ def tier2_estimate(
     # Strategy 1a: Same device, LLM → scale by parameter ratio (memory-bandwidth bound)
     # LLM text-generation speed ≈ BW / (2 × param_bytes).  Because same device = same
     # bandwidth, scaling by param ratio is the most reliable cross-model estimate.
+    # For MoE models, speed scales with active_params (only active experts are loaded
+    # each token), not total params (which determines memory footprint).
     if is_llm and profile.parameters:
+        # Use active_params for speed scaling when available (MoE); else total params
+        speed_params = profile.active_params if (profile.is_moe and profile.active_params) else profile.parameters
+
         llm_refs = []
         for b in benchmarks:
             if b.device != device_id:
@@ -285,17 +292,22 @@ def tier2_estimate(
             llm_refs.append((b, ref_params))
 
         if llm_refs:
-            # Use the benchmark whose model is closest in parameter count
-            llm_refs.sort(key=lambda x: abs(x[1] - profile.parameters))
+            # Use the benchmark whose model is closest in active parameter count
+            llm_refs.sort(key=lambda x: abs(x[1] - speed_params))
             ref_bench, ref_params = llm_refs[0]
-            scale = ref_params / profile.parameters
+            scale = ref_params / speed_params
             scale = min(max(scale, 0.05), 20)
             est = ref_bench.value * scale
             low = est * 0.6
             high = est * 1.4
+            param_label = (
+                f"{speed_params/1e9:.1f}B active"
+                if (profile.is_moe and profile.active_params)
+                else f"{speed_params/1e9:.1f}B"
+            )
             notes = (
                 f"Scaled from {ref_bench.model} ({ref_bench.value:.0f} {ref_bench.metric}) "
-                f"on same device by parameter ratio ({ref_params/1e9:.1f}B / {profile.parameters/1e9:.1f}B)"
+                f"on same device by parameter ratio ({ref_params/1e9:.1f}B / {param_label})"
             )
             return est, (low, high), ref_bench, notes, 1
 
@@ -437,6 +449,8 @@ def estimate(profile: ModelProfile, device_id: str) -> Estimate:
         device_id=device_id,
         parameters=profile.parameters,
         parameters_human=profile.parameters_human,
+        active_params=profile.active_params,
+        is_moe=profile.is_moe,
         flops=profile.flops,
         flops_human=profile.flops_human,
         model_type=profile.model_type,

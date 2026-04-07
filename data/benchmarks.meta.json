@@ -1,8 +1,9 @@
 {
-  "built_at": "2026-04-06T19:10:37.619089+00:00",
-  "total_records": 482,
+  "built_at": "2026-04-07T10:22:51.128995+00:00",
+  "total_records": 564,
   "per_source": {
     "llama_cpp_cuda": 312,
+    "mac_llm_bench": 82,
     "mlperf": 4,
     "nvidia_jetson": 15,
     "ultralytics": 135,

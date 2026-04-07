@@ -13,7 +13,7 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
-Precision = Literal["fp32", "fp16", "bf16", "int8", "int4", "q4_0", "q8_0"]
+Precision = Literal["fp32", "fp16", "bf16", "int8", "int4", "q4_0", "q8_0", "q4_k_m"]
 Metric = Literal["fps", "tok_s_tg", "tok_s_pp", "latency_ms", "samples_s"]
 Confidence = Literal["measured", "official", "community", "estimated"]
 
