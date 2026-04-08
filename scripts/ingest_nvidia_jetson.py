@@ -188,10 +188,12 @@ def parse_table_0_llm(table, timestamp: str) -> list[dict]:
                 continue
             concurrency = 1 if i == 0 else 8
 
-            bid = make_benchmark_id(
-                model, device_id, "fp16", "vllm",
-                context_length=2048,
-            ) + f"__conc{concurrency}"
+            # Position 4 is input_size — use tg{context} so _is_tg_benchmark()
+            # fires correctly. batch_size follows at position 5.
+            bid = (
+                f"{model}__{device_id}__fp16__vllm"
+                f"__tg2048__bs{concurrency}"
+            )
 
             records.append({
                 "benchmark_id": bid,

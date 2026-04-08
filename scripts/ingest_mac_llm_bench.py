@@ -28,9 +28,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from willitrun.pipeline.schema import BenchmarkRecord, make_benchmark_id  # noqa: E402
+from willitrun.pipeline.schema import BenchmarkRecord  # noqa: E402
 
 SOURCE_NAME = "mac_llm_bench"
+SOURCE_LABEL = "mac-llm-bench"
 SOURCE_URL = "https://github.com/jonas/mac-llm-bench"
 
 # Maps benchmark model IDs → willitrun canonical model IDs.
@@ -99,9 +100,9 @@ SPEED_METRICS: list[tuple[str, str]] = [
 ]
 
 QUANT_TO_PRECISION: dict[str, str] = {
-    "Q4_K_M": "q4_k_m",
+    "Q4_K_M": "int4",   # Q4_K_M is a 4-bit GGUF format; normalise to int4
     "4bit": "int4",
-    "q4_k_m": "q4_k_m",
+    "q4_k_m": "int4",
     "fp16": "fp16",
     "bf16": "bf16",
     "fp32": "fp32",
@@ -149,9 +150,10 @@ def _records_from_file(
         if speed_key not in speed:
             continue
         value = float(speed[speed_key])
-        benchmark_id = make_benchmark_id(
-            SOURCE_NAME, model_id, device_id, precision, metric
-        )
+        # Use the standard __ separator format so build_db can recover input_size
+        # from position 4 and _is_tg_benchmark() / _is_pp_benchmark() work correctly.
+        # Format: {model_id}__{device_id}__{precision}__{framework}__{input_size}__bs1
+        benchmark_id = f"{model_id}__{device_id}__{precision}__{framework}__{speed_key}__bs1"
         records.append(
             BenchmarkRecord(
                 benchmark_id=benchmark_id,
@@ -162,7 +164,7 @@ def _records_from_file(
                 value=value,
                 framework=framework,
                 source_url=SOURCE_URL,
-                source_name=SOURCE_NAME,
+                source_name=SOURCE_LABEL,
                 confidence="measured",
                 collected_at=collected_at,
                 notes=f"raw_file={path.name}",

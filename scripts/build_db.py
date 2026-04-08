@@ -79,7 +79,7 @@ def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Mode
     # Map legacy keys to normalized schema
     def map_precision(p: str) -> str:
         p = p.lower()
-        if p in {"4bit", "int4"}:
+        if p in {"4bit", "int4", "q4_k_m"}:  # Q4_K_M is 4-bit; normalise to int4
             return "int4"
         if p in {"8bit", "int8"}:
             return "int8"
@@ -118,14 +118,17 @@ def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Mode
     metric = map_metric(entry.get("metric", "fps"), input_size)
 
     source = entry.get("source", {})
-    if isinstance(source, dict):
+    if isinstance(source, dict) and source:
+        # Nested source dict — format used by nvidia_jetson, mlperf, ultralytics ingest scripts
         source_name = source.get("name", source.get("type", "unknown"))
         source_url = source.get("url", "")
         confidence_raw = str(source.get("confidence", "community")).lower()
     else:
-        source_name = str(source)
-        source_url = ""
-        confidence_raw = "community"
+        # Flat fields — format emitted by BenchmarkRecord.model_dump_json()
+        # (used by mac_llm_bench and any future ingest that writes BenchmarkRecord directly)
+        source_name = entry.get("source_name") or (str(source) if source else "unknown")
+        source_url = entry.get("source_url", "")
+        confidence_raw = entry.get("confidence", "community").lower()
 
     confidence_map = {
         "high": "measured",
