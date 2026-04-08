@@ -2,13 +2,15 @@ Output assets/demo.gif
 
 Set Shell "zsh"
 Set Width 1000
-Set Height 600
+Set Height 650
 Set FontSize 18
 Set TypingSpeed 90ms
 
 Type "willitrun"
 Enter
 Sleep 1500ms
+Enter
+Sleep 500ms
 
 Type "llama"
 Sleep 500ms
