@@ -5,11 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/smoothyy3/willitrun/ci.yml?branch=main)](https://github.com/smoothyy3/willitrun/actions)
 
-> CLI to tell you if an ML model will fit and run on your device -- and find the best models for your hardware.
-
 ### Find the best models for your device
 
-Given a device and task category, willitrun ranks what runs best -- real benchmarks first, scaled estimates as fallback.
+Given a device and task category, willitrun ranks what runs best. Real benchmarks first, scaled estimates as fallback.
 
 ![willitrun inverse mode demo](assets/demo_inverse.gif)
 
