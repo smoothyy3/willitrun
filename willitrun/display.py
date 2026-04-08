@@ -143,6 +143,56 @@ def display_result(est: Estimate, rec: Recommendation) -> None:
         console.print()
 
 
+def display_ranked_models(results: list, device_name: str, category: str) -> None:
+    """Display ranked model results for inverse query mode."""
+    from .ranker import RankedModelResult  # noqa: PLC0415 — avoid circular at module level
+
+    table = Table(
+        title=f"Best [bold]{category}[/bold] models for [bold]{device_name}[/bold]",
+        border_style="blue",
+    )
+    table.add_column("Model", style="bold cyan", no_wrap=True)
+    table.add_column("Speed", justify="right")
+    table.add_column("Params", justify="right")
+    table.add_column("Confidence")
+
+    for r in results:
+        # Speed cell
+        if r.fps is None:
+            speed_str = "[dim]—[/dim]"
+        elif r.fps_range:
+            low, high = r.fps_range
+            speed_str = f"~{r.fps:.0f} {r.metric_label}  [dim]({low:.0f}–{high:.0f})[/dim]"
+        else:
+            speed_str = f"{r.fps:.0f} {r.metric_label}"
+
+        # Confidence cell
+        if r.confidence == "measured":
+            conf_str = "[bold green]● Real data[/bold green]"
+            if r.source:
+                conf_str += f"  [dim]({r.source})[/dim]"
+            style = None
+        else:
+            conf_str = "[yellow]⊙ Estimated[/yellow]"
+            style = "dim"
+
+        table.add_row(
+            r.model_id,
+            speed_str,
+            r.params,
+            conf_str,
+            style=style,
+        )
+
+    console.print()
+    console.print(table)
+    console.print(
+        "  [dim]● Real benchmark  ⊙ Scaled estimate  ·  "
+        f"Run [bold]willitrun <model> --device <device>[/bold] for full details[/dim]"
+    )
+    console.print()
+
+
 def display_devices(devices: dict) -> None:
     """Display available devices in a table."""
     table = Table(title="Available Devices", border_style="blue")

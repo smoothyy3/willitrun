@@ -8,11 +8,12 @@ import click
 
 from . import __version__
 from . import data_access
-from .display import console, display_devices, display_models, display_result
+from .display import console, display_devices, display_models, display_ranked_models, display_result
 from .estimator import estimate
 from .interactive import run_interactive
 from .loader import resolve_model
 from .profiler import profile_model
+from .ranker import get_best_models_for_device
 from .recommender import recommend
 
 
@@ -48,6 +49,11 @@ def _status_msg_for(model: str) -> str:
     help="Override precision for estimation.",
 )
 @click.option(
+    "--task", "-t",
+    required=False,
+    help="Find best models for a device by task category (e.g. llm, detection).",
+)
+@click.option(
     "--json", "output_json", is_flag=True,
     help="Output result as JSON.",
 )
@@ -58,6 +64,7 @@ def main(
     list_devices: bool,
     list_models: bool,
     precision: str | None,
+    task: str | None,
     output_json: bool,
 ) -> None:
     """Will your ML model run on your device? Find out in one command.
@@ -73,6 +80,26 @@ def main(
         display_models({m.model_id: m.model_dump() for m in data_access.list_models()})
         return
 
+    # ── Inverse mode: --device --task ───────────────────────────────────────
+    if task is not None:
+        if device is None:
+            console.print("[bold red]Error:[/bold red] --task requires --device.")
+            console.print("Example: willitrun --device jetson-orin-nano-8gb --task detection")
+            raise SystemExit(1)
+        devices = {d.device_id: d.model_dump() for d in data_access.list_devices()}
+        if device not in devices:
+            console.print(f"[bold red]Error:[/bold red] Unknown device [bold]'{device}'[/bold].")
+            console.print("Run [bold]willitrun --list-devices[/bold] to see all supported hardware.")
+            raise SystemExit(1)
+        device_name = devices[device].get("name", device)
+        with console.status(f"[bold blue]Ranking {task} models for {device_name}...[/bold blue]"):
+            results = get_best_models_for_device(device, task)
+        if not results:
+            console.print(f"[yellow]No models found for category '{task}'.[/yellow]")
+            raise SystemExit(0)
+        display_ranked_models(results, device_name, task)
+        return
+
     # ── Interactive mode ────────────────────────────────────────────────────
     model_info = None
     if model is None and device is None:
@@ -80,6 +107,9 @@ def main(
             {m.model_id: m.model_dump() for m in data_access.list_models()},
             {d.device_id: d.model_dump() for d in data_access.list_devices()},
         )
+        # Inverse flow: results already displayed inside run_interactive
+        if model_info is None and device is None:
+            return
         # model_info is already fully resolved; skip the resolve block below
 
     # ── Direct mode: require both arguments ─────────────────────────────────

@@ -91,6 +91,10 @@ def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Mode
 
     def map_metric(m: str, input_size: str | None) -> str:
         m_low = m.lower()
+        # Already-normalized values from ingest scripts — pass through directly
+        if m_low in {"tok_s_tg", "tok_s_pp", "fps", "latency_ms", "samples_s"}:
+            return m_low
+        # Legacy display strings from older ingest scripts
         if m_low in {"tok/s", "toks", "tokens/s"}:
             if input_size and input_size.startswith("pp"):
                 return "tok_s_pp"

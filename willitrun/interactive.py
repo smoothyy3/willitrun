@@ -18,7 +18,7 @@ from pathlib import Path
 
 from rich.panel import Panel
 
-from .display import console
+from .display import console, display_ranked_models
 from .loader import (
     ModelInfo,
     resolve_from_database,
@@ -212,7 +212,63 @@ _STYLE_DEF = [
 ]
 
 
-def _run_questionary(models: dict, devices: dict) -> tuple[ModelInfo, str]:
+def _run_inverse_questionary(devices: dict, style) -> None:
+    """Interactive flow for 'Find best models for my device'."""
+    import questionary  # noqa: PLC0415
+    from .ranker import list_categories, get_best_models_for_device  # noqa: PLC0415
+
+    device_display = _device_choices(devices)
+
+    # ── Step 1: device ─────────────────────────────────────────────
+    raw_device = questionary.text(
+        "Device",
+        instruction="(type to filter · Tab for full list)",
+        completer=_make_lazy_completer(device_display),
+        complete_while_typing=True,
+        style=style,
+        validate=lambda _: True,
+    ).ask()
+
+    if raw_device is None:
+        raise SystemExit(0)
+
+    raw_device = raw_device.strip()
+    device_id  = _slug_from_choice(raw_device) if " " in raw_device else raw_device
+    device_name = devices.get(device_id, {}).get("name", device_id)
+
+    console.print()
+
+    # ── Step 2: category ───────────────────────────────────────────
+    categories = list_categories()
+    if not categories:
+        console.print("[yellow]No model categories found in the database.[/yellow]")
+        return
+
+    category = questionary.select(
+        "Category",
+        choices=categories,
+        style=style,
+    ).ask()
+
+    if category is None:
+        raise SystemExit(0)
+
+    console.print()
+
+    # ── Step 3: compute and display ────────────────────────────────
+    with console.status(f"[bold blue]Ranking {category} models for {device_name}...[/bold blue]"):
+        results = get_best_models_for_device(device_id, category)
+
+    if not results:
+        console.print(
+            f"[yellow]No models or benchmarks found for category '{category}'.[/yellow]"
+        )
+        return
+
+    display_ranked_models(results, device_name, category)
+
+
+def _run_questionary(models: dict, devices: dict) -> tuple[ModelInfo | None, str | None]:
     import questionary  # noqa: PLC0415
 
     style          = questionary.Style(_STYLE_DEF)
@@ -220,6 +276,25 @@ def _run_questionary(models: dict, devices: dict) -> tuple[ModelInfo, str]:
     device_display = _device_choices(devices)
 
     _print_intro()
+
+    # ── Mode selection ──────────────────────────────────────────────
+    mode = questionary.select(
+        "What do you want to do?",
+        choices=[
+            "Check a specific model on a device",
+            "Find best models for my device",
+        ],
+        style=style,
+    ).ask()
+
+    if mode is None:
+        raise SystemExit(0)
+
+    console.print()
+
+    if mode == "Find best models for my device":
+        _run_inverse_questionary(devices, style)
+        return None, None
 
     # ── Step 1: model ──────────────────────────────────────────────
     raw_model = questionary.text(
@@ -275,8 +350,14 @@ def _run_questionary(models: dict, devices: dict) -> tuple[ModelInfo, str]:
 # Public entry point
 # ---------------------------------------------------------------------------
 
-def run_interactive(models: dict, devices: dict) -> tuple[ModelInfo, str]:
-    """Run two-step interactive picker and return (model_info, device_id).
+def run_interactive(
+    models: dict, devices: dict
+) -> tuple[ModelInfo | None, str | None]:
+    """Run interactive mode and return (model_info, device_id).
+
+    Returns (None, None) when the inverse flow ('Find best models') was
+    selected — results are displayed inside this function and the caller
+    should exit cleanly without further processing.
 
     The model is fully resolved here (database / file / HuggingFace) so the
     caller does not need a second resolution pass.
