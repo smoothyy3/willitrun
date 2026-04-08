@@ -7,7 +7,15 @@
 
 > CLI to tell you if an ML model will fit and run on your device -- and find the best models for your hardware.
 
+### Find the best models for your device
+
+Given a device and task category, willitrun ranks what runs best -- real benchmarks first, scaled estimates as fallback.
+
 ![willitrun inverse mode demo](assets/demo_inverse.gif)
+
+### Check if a specific model runs on your device
+
+Pick any model by name, HuggingFace ID, or local file. Get a verdict, speed estimate, and memory breakdown instantly.
 
 ![willitrun model check demo](assets/demo.gif)
 
@@ -30,25 +38,6 @@ Or with pip:
 pip install willitrun
 willitrun
 ```
-
-### Check if a model runs on your device
-
-```bash
-willitrun                              # interactive picker
-willitrun <model> --device <device>   # direct
-willitrun <model> --device <device> --json
-```
-
-### Find the best models for your device
-
-```bash
-willitrun --device apple-m5-32gb --task llm
-willitrun --device jetson-agx-orin-64gb --task detection
-```
-
-Or select **"Find best models for my device"** in interactive mode.
-
-Results are sorted by real benchmark speed first, with Tier 2 estimates filling in uncovered models.
 
 Install extras for local file profiling:
 ```bash
@@ -92,17 +81,6 @@ make status      # coverage summary + gaps
 make wheel       # rebuild DB, sync into package, build wheel
 ```
 
-## Coverage
-
-The inverse query mode (best models for device) is backed by real benchmarks for:
-
-| Device | Real benchmarks |
-|---|---|
-| `apple-m5-32gb` | 37 LLM benchmarks (5 models) |
-| `jetson-agx-orin-64gb` | 11 models across 5 categories |
-
-Most other devices have 1-3 real benchmarks and fall back to Tier 2 estimation for uncovered models.
-
 ## Contributing data
 
 1. Add benchmarks: append JSON lines to `data/normalized/<source>.jsonl` following `BenchmarkRecord`.
@@ -121,7 +99,6 @@ pytest
 
 ## Limitations
 - Tier 2 estimates rely on available reference benchmarks; uncommon model/device combos may show wider ranges.
-- Inverse query coverage is limited outside of M5 and Jetson AGX Orin today -- more data PRs welcome.
 - Ingest scripts need network access; cached raw files avoid re-fetching within TTL.
 
 ## Roadmap
