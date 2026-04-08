@@ -14,5 +14,8 @@ htmlcov/
 venv/
 .DS_Store
 
+# Raw ingest cache — originals live in their source repos; no need to duplicate
+data/raw/
+
 # Legacy build artifacts
 data/benchmarks.generated.yaml
