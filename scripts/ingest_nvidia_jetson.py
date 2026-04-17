@@ -280,7 +280,7 @@ def parse_mlperf_table(table, timestamp: str, seen_ids: set) -> list[dict]:
             continue
 
         task = TASK_MAP.get(model, "other")
-        bid = make_benchmark_id(model, "jetson-agx-orin-64gb", "int8", "tensorrt") + "__ss"
+        bid = make_benchmark_id("nvidia_jetson", model, "jetson-agx-orin-64gb", "int8", "fps") + "__ss"
 
         # Skip if we already have this benchmark from a newer MLPerf round
         if bid in seen_ids:

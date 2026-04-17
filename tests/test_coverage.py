@@ -89,7 +89,7 @@ def test_all_benchmarks_have_required_fields(benchmarks):
         assert b.model, f"Missing model field in benchmark: {b}"
         assert b.device, f"Missing device field in benchmark: {b}"
         assert b.value > 0, f"Non-positive value in benchmark: model={b.model} device={b.device} value={b.value}"
-        assert b.metric in ("fps", "tok/s"), (
+        assert b.metric in ("fps", "tok/s", "samples/s", "latency_ms"), (
             f"Unexpected metric {b.metric!r} in benchmark: model={b.model} device={b.device}"
         )
 

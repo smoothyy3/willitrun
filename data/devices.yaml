@@ -1559,6 +1559,42 @@ apple-m5-max-64gb:
 # Source: AMD.com; FP16 = 2× FP32 for RDNA2/3
 # ============================================================
 
+rx-9070-xt-16gb:
+  name: "AMD Radeon RX 9070 XT 16GB"
+  vendor: amd
+  device_family: rdna4
+  type: desktop_gpu
+  gpu:
+    name: "Navi 48 XT"
+    compute_units: 64
+    tflops_fp16: 48.7
+  memory:
+    total_gb: 16
+    type: "GDDR6"
+    bandwidth_gbps: 560
+    unified: false
+  tdp_watts: 220
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, onnxruntime, llama.cpp]
+
+rx-9070-16gb:
+  name: "AMD Radeon RX 9070 16GB"
+  vendor: amd
+  device_family: rdna4
+  type: desktop_gpu
+  gpu:
+    name: "Navi 48"
+    compute_units: 56
+    tflops_fp16: 42.6
+  memory:
+    total_gb: 16
+    type: "GDDR6"
+    bandwidth_gbps: 560
+    unified: false
+  tdp_watts: 220
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, onnxruntime, llama.cpp]
+
 rx-7900-xtx-24gb:
   name: "AMD Radeon RX 7900 XTX 24GB"
   vendor: amd
@@ -1684,6 +1720,40 @@ rx-6700-xt-12gb:
   tdp_watts: 230
   supported_precisions: [fp32, fp16, int8, 4bit]
   supported_runtimes: [pytorch, onnxruntime, llama.cpp]
+
+rx-6650-xt-8gb:
+  name: "AMD Radeon RX 6650 XT 8GB"
+  vendor: amd
+  device_family: rdna2
+  type: desktop_gpu
+  gpu:
+    name: "Navi 23 XT"
+    compute_units: 32
+    tflops_fp16: 16.1
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 280
+    unified: false
+  tdp_watts: 160
+  supported_precisions: [fp32, fp16, int8, 4bit]
+
+rx-7600-8gb:
+  name: "AMD Radeon RX 7600 8GB"
+  vendor: amd
+  device_family: rdna3
+  type: desktop_gpu
+  gpu:
+    name: "Navi 33"
+    compute_units: 28
+    tflops_fp16: 43.0
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 288
+    unified: false
+  tdp_watts: 165
+  supported_precisions: [fp32, fp16, int8, 4bit]
 
 # ============================================================
 # Budget / Other

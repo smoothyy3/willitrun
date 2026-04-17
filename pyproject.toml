@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "willitrun"
-version = "0.1.7"
+version = "0.1.8"
 description = "Will your ML model run on your device? Find out in one command."
 readme = "README.md"
 license = "MIT"
@@ -73,7 +73,7 @@ willitrun = ["data/*.yaml", "data/*.db", "data/*.json"]
 
 [tool.willitrun]
 raw_ttl_days = 7
-source_priority = ["llama_cpp", "mlperf", "nvidia_jetson", "ultralytics", "ultralytics_gpu", "xiongjieddai", "curated"]
+source_priority = ["llama_cpp", "mlperf", "nvidia_jetson", "ultralytics", "ultralytics_gpu", "xiongjieddai", "localscore", "geerlingguy", "curated"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

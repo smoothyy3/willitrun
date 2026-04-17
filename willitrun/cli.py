@@ -166,7 +166,7 @@ def main(
 
     # ── Estimation pipeline ─────────────────────────────────────────────────
     profile = profile_model(model_info)
-    est     = estimate(profile, device)
+    est     = estimate(profile, device, precision)
     rec     = recommend(est)
 
     if output_json:

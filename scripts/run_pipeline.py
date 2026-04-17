@@ -25,6 +25,8 @@ SOURCES = {
     "mlperf": SCRIPTS_DIR / "ingest_mlperf.py",
     "llama_cpp": SCRIPTS_DIR / "ingest_llama_cpp.py",
     "xiongjieddai": SCRIPTS_DIR / "ingest_xiongjieddai.py",
+    "localscore": SCRIPTS_DIR / "ingest_localscore.py",
+    "geerlingguy": SCRIPTS_DIR / "ingest_geerlingguy.py",
 }
 
 

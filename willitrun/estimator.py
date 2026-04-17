@@ -193,6 +193,7 @@ def tier1_lookup(
     device_id: str,
     benchmarks: list[BenchmarkResult],
     models_db: dict,
+    precision: str | None = None,
 ) -> tuple[BenchmarkResult | None, BenchmarkResult | None]:
     """Tier 1: exact match in benchmark database.
 
@@ -202,6 +203,9 @@ def tier1_lookup(
 
     For LLMs, text generation speed is what users experience during chat.
     Prompt processing (pp) is up to 30× faster and would be misleading as a headline.
+
+    When precision is specified, candidates are filtered to that precision first.
+    If no results match, falls back to all precisions so the user still gets an answer.
     """
     model_key = _resolve_model_key(model_name, models_db) or model_name
     model_type = models_db.get(model_key, {}).get("model_type", "")
@@ -211,6 +215,11 @@ def tier1_lookup(
         if (_resolve_model_key(b.model, models_db) or b.model) == model_key
         and b.device == device_id
     ]
+
+    if precision and candidates:
+        filtered = [b for b in candidates if b.precision == precision]
+        if filtered:
+            candidates = filtered
 
     if not candidates:
         return None, None
@@ -347,8 +356,12 @@ def tier2_estimate(
             )
             return est, (low, high), ref_bench, notes, 1
 
-    # Strategy 2: Same model, different device → scale by TFLOPS
+    # Strategy 2: Same model, different device → scale by TFLOPS.
+    # Collect all valid cross-device references and pick the one whose TFLOPS
+    # ratio is closest to 1 (most similar device), rather than returning on the
+    # first match (which is load-order dependent and can produce poor estimates).
     model_key = profile.name
+    cross_device_refs: list[tuple[float, BenchmarkResult, dict]] = []
     for b in benchmarks:
         if not _is_valid_ref(b):
             continue
@@ -361,7 +374,13 @@ def tier2_estimate(
         ref_tflops = get_best_tflops(ref_device)
         if ref_tflops == 0 or device_tflops == 0:
             continue
+        closeness = abs(1.0 - device_tflops / ref_tflops)
+        cross_device_refs.append((closeness, b, ref_device))
 
+    if cross_device_refs:
+        cross_device_refs.sort(key=lambda x: x[0])
+        _, b, ref_device = cross_device_refs[0]
+        ref_tflops = get_best_tflops(ref_device)
         scale = device_tflops / ref_tflops
         ref_bw = ref_device.get("memory", {}).get("bandwidth_gbps") or 1
         dev_bw = device_spec.get("memory", {}).get("bandwidth_gbps") or 1
@@ -403,7 +422,7 @@ def tier2_estimate(
     return None, None, None, "No suitable reference benchmark found", 0
 
 
-def estimate(profile: ModelProfile, device_id: str) -> Estimate:
+def estimate(profile: ModelProfile, device_id: str, precision: str | None = None) -> Estimate:
     """Run the full estimation pipeline for a model on a device."""
     benchmarks = _load_benchmarks()
     devices = _load_devices()
@@ -466,8 +485,12 @@ def estimate(profile: ModelProfile, device_id: str) -> Estimate:
         model_source=getattr(profile, "source", "database") or "database",
     )
 
+    # Normalise CLI precision aliases to stored values (stored always uses "int4", not "4bit")
+    _PRECISION_ALIASES = {"4bit": "int4"}
+    norm_precision = _PRECISION_ALIASES.get(precision, precision) if precision else precision
+
     # Tier 1: exact lookup
-    bench, secondary = tier1_lookup(profile.name, device_id, benchmarks, models_db)
+    bench, secondary = tier1_lookup(profile.name, device_id, benchmarks, models_db, norm_precision)
     if bench:
         result.tier = 1
         result.benchmark = bench

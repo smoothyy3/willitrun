@@ -24,6 +24,8 @@ DEFAULT_PRIORITY = [
     "ultralytics",
     "ultralytics_gpu",
     "xiongjieddai",
+    "localscore",
+    "geerlingguy",
     "curated",
 ]
 

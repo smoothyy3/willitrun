@@ -7,6 +7,8 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 @dataclass
 class ModelInfo:
     """Normalized model information from any source."""
@@ -352,4 +354,3 @@ def resolve_model(model_input: str) -> ModelInfo:
 
     # Fallback: return minimal info
     return ModelInfo(name=model_input, source="unknown")
-logger = logging.getLogger(__name__)

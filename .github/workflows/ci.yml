@@ -24,8 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .[dev]
 
+      - name: Validate JSONL data
+        run: python scripts/build_db.py --validate-only
+
       - name: Build benchmark DB
         run: make build_db
+
+      - name: Sync packaged DB for tests
+        run: cp data/benchmarks.db willitrun/data/benchmarks.db
 
       - name: Run tests
         run: pytest

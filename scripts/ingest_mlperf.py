@@ -283,7 +283,7 @@ def parse(data: list[dict], version: str) -> list[dict]:
         elif "onnx" in str(entry.get("Software", "")).lower():
             framework = "onnxruntime"
 
-        bid = make_benchmark_id(canonical_model, device_id, precision, framework) + "__mlperf_ss"
+        bid = make_benchmark_id("mlperf", canonical_model, device_id, precision, "fps") + "__mlperf_ss"
 
         # Keep the best (highest fps) if duplicate benchmark_id
         if bid in seen_ids:

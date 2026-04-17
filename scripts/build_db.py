@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sqlite3
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -75,7 +76,7 @@ def _resolve_model_id(model_id: str, models: dict[str, Model]) -> str | None:
     return None
 
 
-def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Model]) -> BenchmarkRecord | None:
+def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Model], skip_stats: dict | None = None) -> BenchmarkRecord | None:
     # Map legacy keys to normalized schema
     def map_precision(p: str) -> str:
         p = p.lower()
@@ -165,31 +166,42 @@ def parse_record(entry: dict, devices: dict[str, Device], models: dict[str, Mode
         )
     except ValidationError as exc:
         print(f"  [SKIP] {bid}: {exc}")
+        if skip_stats is not None:
+            skip_stats["validation"] = skip_stats.get("validation", 0) + 1
         return None
 
     if record.device_id not in devices:
         print(f"  [SKIP] {bid}: device_id '{record.device_id}' not in devices.yaml")
+        if skip_stats is not None:
+            skip_stats["device"] = skip_stats.get("device", 0) + 1
         return None
     if record.model_id not in models:
         print(f"  [SKIP] {bid}: model_id '{record.model_id}' not in models.yaml")
+        if skip_stats is not None:
+            skip_stats["model"] = skip_stats.get("model", 0) + 1
         return None
     return record
 
 
-def load_normalized(devices: dict[str, Device], models: dict[str, Model]) -> dict[str, list[BenchmarkRecord]]:
+def load_normalized(
+    devices: dict[str, Device], models: dict[str, Model]
+) -> tuple[dict[str, list[BenchmarkRecord]], dict[str, dict[str, int]]]:
     records: dict[str, list[BenchmarkRecord]] = {}
+    skipped: dict[str, dict[str, int]] = {}
     for path in list_normalized():
         source = path.stem
         records[source] = []
+        skip_stats: dict[str, int] = {}
         with open(path) as f:
             for line in f:
                 if not line.strip():
                     continue
                 entry = json.loads(line)
-                rec = parse_record(entry, devices, models)
+                rec = parse_record(entry, devices, models, skip_stats)
                 if rec:
                     records[source].append(rec)
-    return records
+        skipped[source] = skip_stats
+    return records, skipped
 
 
 def load_curated(devices: dict[str, Device], models: dict[str, Model]) -> list[BenchmarkRecord]:
@@ -352,7 +364,7 @@ def build_db(validate_only: bool = False) -> None:
     cfg = load_config(ROOT)
     devices = load_devices()
     models = load_models()
-    sources = load_normalized(devices, models)
+    sources, skipped = load_normalized(devices, models)
     curated = load_curated(devices, models)
 
     deduped, collisions = deduplicate(cfg.priority, sources, curated)
@@ -374,20 +386,29 @@ def build_db(validate_only: bool = False) -> None:
         return
 
     db_path = DATA_DIR / "benchmarks.db"
-    conn = sqlite3.connect(db_path)
+    tmp_path = DATA_DIR / "benchmarks.tmp.db"
     try:
-        ensure_schema(conn)
-        insert_all(conn, deduped, devices, models)
-        conn.commit()
+        conn = sqlite3.connect(tmp_path)
+        try:
+            ensure_schema(conn)
+            insert_all(conn, deduped, devices, models)
+            conn.commit()
+        finally:
+            conn.close()
+        # Atomic rename — on POSIX this is a single syscall; on Windows it
+        # replaces the target file without a window where neither file exists.
+        shutil.move(str(tmp_path), str(db_path))
         print(f"Wrote {len(deduped)} records to {db_path}")
-    finally:
-        conn.close()
+    except Exception:
+        tmp_path.unlink(missing_ok=True)
+        raise
 
     meta = {
         "built_at": datetime.now(timezone.utc).isoformat(),
         "total_records": len(deduped),
         "per_source": report,
         "collisions": collisions,
+        "skipped": skipped,
     }
     meta_path = DATA_DIR / "benchmarks.meta.json"
     meta_path.write_text(json.dumps(meta, indent=2))

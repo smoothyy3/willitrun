@@ -1,13 +1,31 @@
 {
-  "built_at": "2026-04-06T19:10:37.619089+00:00",
-  "total_records": 482,
+  "built_at": "2026-04-17T20:06:25.195470+00:00",
+  "total_records": 979,
   "per_source": {
+    "geerlingguy": 54,
     "llama_cpp_cuda": 312,
+    "localscore": 592,
+    "mac_llm_bench": 74,
     "mlperf": 4,
     "nvidia_jetson": 15,
     "ultralytics": 135,
     "ultralytics_gpu": 10,
     "xiongjieddai": 46
   },
-  "collisions": 40
+  "collisions": 263,
+  "skipped": {
+    "geerlingguy": {
+      "validation": 1
+    },
+    "llama_cpp_cuda": {},
+    "localscore": {
+      "device": 64
+    },
+    "mac_llm_bench": {},
+    "mlperf": {},
+    "nvidia_jetson": {},
+    "ultralytics": {},
+    "ultralytics_gpu": {},
+    "xiongjieddai": {}
+  }
 }

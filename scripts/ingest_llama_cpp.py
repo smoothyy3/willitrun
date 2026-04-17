@@ -44,8 +44,10 @@ RAW_DIR = DATA_ROOT / "raw" / "llama_cpp_cuda"
 NORMALIZED_DIR = DATA_ROOT / "normalized"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from willitrun.pipeline.schema import make_benchmark_id
+from gpu_map import resolve_gpu, resolve_apple_chip
 
 # ---- Scoreboard sources (CUDA / ROCm / Vulkan) ----
 # All use the same table format: Chip | Memory | pp512 t/s | tg128 t/s
@@ -70,188 +72,10 @@ SCOREBOARDS = [
 
 APPLE_DISCUSSION_URL = "https://github.com/ggml-org/llama.cpp/discussions/4167"
 
-# ---- GPU Chip Name → Device ID mapping ----
-# The scoreboard uses short chip names like "RTX 4090", "RTX 3090 Ti", etc.
-# We map to our canonical device IDs. Variants (D, Ti, SUPER) map to nearest
-# device in our database, with a note about the exact chip.
-#
-# GPUs not in this map are skipped with a warning — add them here and to
-# data/devices.yaml to include them.
-
-GPU_MAP: dict[str, str] = {
-    # RTX 50 series
-    "rtx 5090": "rtx-5090-32gb",
-    "rtx 5080": "rtx-5080-16gb",
-    "rtx 5070 ti": "rtx-5070ti-16gb",
-    "rtx 5070": "rtx-5070-12gb",
-    # RTX 40 series
-    "rtx 4090": "rtx-4090-24gb",
-    "rtx 4090 d": "rtx-4090-24gb",  # Chinese-market variant, same perf
-    "rtx 4080 super": "rtx-4080s-16gb",
-    "rtx 4080": "rtx-4080-16gb",
-    "rtx 4070 ti super": "rtx-4070tis-16gb",
-    "rtx 4070 ti": "rtx-4070ti-12gb",
-    "rtx 4070 super": "rtx-4070s-12gb",
-    "rtx 4070": "rtx-4070-12gb",
-    "rtx 4060 ti": "rtx-4060ti-8gb",
-    "rtx 4060 ti 16gb": "rtx-4060ti-16gb",
-    "rtx 4060": "rtx-4060-8gb",
-    # RTX 30 series
-    "rtx 3090 ti": "rtx-3090-24gb",
-    "rtx 3090": "rtx-3090-24gb",
-    "rtx 3080 ti": "rtx-3080ti-12gb",
-    "rtx 3080": "rtx-3080-10gb",
-    "rtx 3070 ti": "rtx-3070ti-8gb",
-    "rtx 3070": "rtx-3070-8gb",
-    "rtx 3060 ti": "rtx-3060ti-8gb",
-    "rtx 3060 12gb": "rtx-3060-12gb",
-    "rtx 3060": "rtx-3060-12gb",
-    # RTX 20 series
-    "rtx 2080 ti": "rtx-2080ti-11gb",
-    "rtx 2080 super": "rtx-2080s-8gb",
-    "rtx 2080": "rtx-2080-8gb",
-    "rtx 2070 super": "rtx-2070s-8gb",
-    "rtx 2070": "rtx-2070-8gb",
-    "rtx 2060 super": "rtx-2060s-8gb",
-    "rtx 2060": "rtx-2060-6gb",
-    # GTX series
-    "gtx 1080 ti": "gtx-1080ti-11gb",
-    "gtx 1080": "gtx-1080-8gb",
-    "gtx 1070 ti": "gtx-1070ti-8gb",
-    "gtx 1070": "gtx-1070-8gb",
-    "gtx 1660 super": "gtx-1660s-6gb",
-    "gtx 1660 ti": "gtx-1660ti-6gb",
-    "gtx 1660": "gtx-1660-6gb",
-    "gtx 1650": "gtx-1650-4gb",
-    # Titan
-    "titan rtx": "titan-rtx-24gb",
-    "titan xp": "titan-xp-12gb",
-    "titan v": "titan-v-12gb",
-    # Datacenter / Pro (bonus — skip if not wanted)
-    "h100 80 gb": "h100-80gb",
-    "h100 sxm": "h100-80gb",
-    "h100 pcie": "h100-80gb",
-    "a100 80 gb": "a100-80gb",
-    "a100 40 gb": "a100-40gb",
-    "a100 sxm": "a100-80gb",
-    "a100 pcie": "a100-80gb",
-    "a6000": "a6000-48gb",
-    "rtx a6000": "a6000-48gb",
-    "rtx a5000": "a5000-24gb",
-    "rtx a4000": "a4000-16gb",
-    "l40s": "l40s-48gb",
-    "l40": "l40-48gb",
-    "l4": "l4-24gb",
-    "rtx pro 6000 blackwell": "rtx-pro-6000-96gb",
-    # Laptop GPUs — map to closest desktop if no separate entry
-    # (these will be skipped if not in devices.yaml)
-    "rtx 4090 laptop": "rtx-4090-laptop-16gb",
-    "rtx 4080 laptop": "rtx-4080-laptop-12gb",
-    "rtx 4070 laptop": "rtx-4070-laptop-8gb",
-    "rtx 4060 laptop": "rtx-4060-laptop-8gb",
-    "rtx 3080 laptop": "rtx-3080-laptop-16gb",
-    "rtx 3070 laptop": "rtx-3070-laptop-8gb",
-    "rtx 3060 laptop": "rtx-3060-laptop-6gb",
-    # Tesla / older datacenter
-    "p40": "tesla-p40-24gb",
-    "v100": "v100-16gb",
-    "v100 32 gb": "v100-32gb",
-    "t4": "t4-16gb",
-    "tesla p100": "tesla-p100-16gb",
-    "p100": "tesla-p100-16gb",
-    "a30": "a30-24gb",
-    "a40": "a40-48gb",
-    # Jetson (if people submit Jetson results to the CUDA scoreboard)
-    "jetson agx orin": "jetson-agx-orin-64gb",
-    "jetson orin nx": "jetson-orin-nx-16gb",
-    "jetson orin nano": "jetson-orin-nano-8gb",
-    # Quadro / RTX Pro
-    "quadro rtx 8000": "quadro-rtx8000-48gb",
-    "quadro rtx 6000": "quadro-rtx6000-24gb",
-    "quadro rtx 4000": "quadro-rtx4000-8gb",
-    "rtx 6000 ada": "rtx-6000ada-48gb",
-    "rtx a4500": "rtx-a4500-20gb",
-    "rtx pro 6000 blackwell": "rtx-pro-6000-96gb",
-    # Intel Arc — discrete (Alchemist A-series + Battlemage B-series)
-    "intel arc a770": "intel-arc-a770-16gb",
-    "arc a770": "intel-arc-a770-16gb",
-    "arc a770 16gb": "intel-arc-a770-16gb",
-    "intel arc a770m": "intel-arc-a770m-16gb",
-    "arc a770m": "intel-arc-a770m-16gb",
-    "intel arc a750": "intel-arc-a750-8gb",
-    "arc a750": "intel-arc-a750-8gb",
-    "intel arc b580": "intel-arc-b580-12gb",
-    "arc b580": "intel-arc-b580-12gb",
-    "intel arc b570": "intel-arc-b570-10gb",
-    "arc b570": "intel-arc-b570-10gb",
-    "intel arc pro b60": "intel-arc-pro-b60-24gb",
-    "arc pro b60": "intel-arc-pro-b60-24gb",
-    "intel arc pro b50": "intel-arc-pro-b50-24gb",
-    "arc pro b50": "intel-arc-pro-b50-24gb",
-    # Intel iGPU — Lunar Lake / Meteor Lake (use system RAM)
-    "intel core ultra 200 series": "intel-core-ultra-200",
-    "intel core ultra 200": "intel-core-ultra-200",
-    "core ultra 200": "intel-core-ultra-200",
-    "intel core ultra 100 series": "intel-core-ultra-100",
-    "intel core ultra 100": "intel-core-ultra-100",
-    "core ultra 100": "intel-core-ultra-100",
-    # AMD APU / iGPU (Strix Halo, Strix Point, Phoenix, Rembrandt)
-    "amd ryzen ai max+ 395": "amd-ryzen-ai-max-395",
-    "amd ryzen al max+ 395": "amd-ryzen-ai-max-395",   # common typo in scoreboard
-    "ryzen ai max+ 395": "amd-ryzen-ai-max-395",
-    "amd ryzen ai 9 300 series": "amd-ryzen-ai-9-300",
-    "ryzen ai 9 300 series": "amd-ryzen-ai-9-300",
-    "amd ryzen z1 extreme": "amd-ryzen-z1-extreme",
-    "ryzen z1 extreme": "amd-ryzen-z1-extreme",
-    "amd ryzen 8000 series": "amd-ryzen-8000-apu",
-    "ryzen 8000 series": "amd-ryzen-8000-apu",
-    "amd ryzen 6000 series": "amd-ryzen-6000-apu",
-    "ryzen 6000 series": "amd-ryzen-6000-apu",
-    # Apple via MoltenVK (Vulkan scoreboard — slightly lower than Metal)
-    "apple m1": "apple-m1-16gb",
-    "apple m2": "apple-m2-16gb",
-    "apple m2 pro": "apple-m2-pro-16gb",
-    "apple m2 ultra": "apple-m2-ultra-64gb",
-    "apple m3": "apple-m3-8gb",
-    "apple m3 ultra": "apple-m1-ultra-64gb",  # no M3 Ultra entry yet, map nearest
-    "apple m4 max": "apple-m4-max-36gb",
-    # AMD RDNA3
-    "rx 7900 xtx": "rx-7900-xtx-24gb",
-    "radeon rx 7900 xtx": "rx-7900-xtx-24gb",
-    "rx 7900 xt": "rx-7900-xt-20gb",
-    "radeon rx 7900 xt": "rx-7900-xt-20gb",
-    "rx 7900 gre": "rx-7900-gre-16gb",
-    "radeon rx 7900 gre": "rx-7900-gre-16gb",
-    "rx 7800 xt": "rx-7800-xt-16gb",
-    "radeon rx 7800 xt": "rx-7800-xt-16gb",
-    # AMD RDNA2
-    "rx 6900 xt": "rx-6900-xt-16gb",
-    "radeon rx 6900 xt": "rx-6900-xt-16gb",
-    "rx 6800 xt": "rx-6800-xt-16gb",
-    "radeon rx 6800 xt": "rx-6800-xt-16gb",
-    "rx 6700 xt": "rx-6700-xt-12gb",
-    "radeon rx 6700 xt": "rx-6700-xt-12gb",
-}
-
-# ---- Apple Silicon Chip Name → Device ID mapping ----
-# Discussion #4167 chip names include "(NN GPU)" suffix — strip before lookup
-APPLE_CHIP_MAP: dict[str, str] = {
-    "m1": "apple-m1-16gb",
-    "m1 pro": "apple-m1-pro-16gb",
-    "m1 max": "apple-m1-max-32gb",
-    "m1 ultra": "apple-m1-ultra-64gb",
-    "m2": "apple-m2-16gb",
-    "m2 pro": "apple-m2-pro-16gb",
-    "m2 max": "apple-m2-max-32gb",
-    "m2 ultra": "apple-m2-ultra-64gb",
-    "m3": "apple-m3-8gb",
-    "m3 pro": "apple-m3-pro-18gb",
-    "m3 max": "apple-m3-max-36gb",
-    "m4": "apple-m4-pro-24gb",   # base M4 maps to closest Pro config
-    "m4 pro": "apple-m4-pro-24gb",
-    "m4 max": "apple-m4-max-36gb",
-    "m5 max": "apple-m5-max-64gb",
-}
+# GPU chip name normalisation and device_id resolution are provided by the
+# shared gpu_map module (imported above).  All ingest scripts use the same
+# canonical mapping so that adding a new device to gpu_map.py instantly
+# benefits every source.
 
 # Apple quant format → our precision label
 APPLE_QUANT_PRECISION: dict[str, str] = {
@@ -260,48 +84,6 @@ APPLE_QUANT_PRECISION: dict[str, str] = {
     "q4_0": "4bit",
 }
 
-
-def normalize_gpu_name(raw: str) -> str:
-    """Normalize GPU chip name for lookup.
-
-    Handles variations like:
-      "GeForce RTX 4090" → "rtx 4090"
-      "NVIDIA RTX 4090 D" → "rtx 4090 d"
-      "RTX 4090 (24 GB)" → "rtx 4090"
-    """
-    name = raw.strip().lower()
-    # Remove common prefixes
-    for prefix in ("nvidia ", "geforce ", "tesla "):
-        if name.startswith(prefix):
-            name = name[len(prefix):]
-    # Remove parenthetical memory info — we use the Memory column instead
-    name = re.sub(r"\s*\([^)]*\)\s*", " ", name)
-    # Remove "gpu" suffix
-    name = re.sub(r"\s+gpu$", "", name)
-    # Collapse whitespace
-    name = re.sub(r"\s+", " ", name).strip()
-    return name
-
-
-def resolve_gpu(raw_chip: str) -> str | None:
-    """Resolve raw chip name to device_id."""
-    normalized = normalize_gpu_name(raw_chip)
-
-    # Exact match
-    if normalized in GPU_MAP:
-        return GPU_MAP[normalized]
-
-    # Try without trailing memory size (e.g. "rtx 3060 12gb" → "rtx 3060")
-    without_mem = re.sub(r"\s+\d+\s*gb$", "", normalized)
-    if without_mem in GPU_MAP:
-        return GPU_MAP[without_mem]
-
-    # Try matching as substring (longest match first)
-    for pattern in sorted(GPU_MAP.keys(), key=len, reverse=True):
-        if pattern in normalized:
-            return GPU_MAP[pattern]
-
-    return None
 
 
 def parse_value_with_stddev(raw: str) -> float | None:
@@ -486,8 +268,7 @@ def parse_scoreboard_tables(html: str, backend_note: str = "CUDA") -> list[dict]
             # Emit pp512 record (prompt processing tok/s)
             if pp_val and pp_val > 0:
                 bid = make_benchmark_id(
-                    "llama-2-7b", device_id, "4bit", "llama.cpp",
-                    input_size="pp512", batch_size=1,
+                    "llama_cpp", "llama-2-7b", device_id, "int4", "tok_s_pp",
                 ) + f"__{fa_label}"
 
                 notes_parts = [
@@ -503,22 +284,16 @@ def parse_scoreboard_tables(html: str, backend_note: str = "CUDA") -> list[dict]
 
                 records.append({
                     "benchmark_id": bid,
-                    "model": "llama-2-7b",
-                    "device": device_id,
-                    "task": "llm",
-                    "precision": "4bit",
+                    "model_id": "llama-2-7b",
+                    "device_id": device_id,
+                    "precision": "int4",
                     "framework": "llama.cpp",
-                    "metric": "tok/s",
+                    "metric": "tok_s_pp",
                     "value": round(pp_val, 2),
-                    "unit": "tokens/sec",
-                    "batch_size": 1,
-                    "llm_setup": {
-                        "prompt_tokens": 512,
-                        "generation_tokens": 0,
-                        "quantization_format": "GGUF Q4_0",
-                    },
-                    "source": source,
-                    "provenance": provenance,
+                    "source_name": f"llama.cpp {backend_note} Scoreboard",
+                    "source_url": source["url"],
+                    "confidence": "measured",
+                    "collected_at": provenance["collected_at"],
                     "notes": "; ".join(notes_parts),
                 })
                 row_count += 1
@@ -526,8 +301,7 @@ def parse_scoreboard_tables(html: str, backend_note: str = "CUDA") -> list[dict]
             # Emit tg128 record (text generation tok/s)
             if tg_val and tg_val > 0:
                 bid = make_benchmark_id(
-                    "llama-2-7b", device_id, "4bit", "llama.cpp",
-                    input_size="tg128", batch_size=1,
+                    "llama_cpp", "llama-2-7b", device_id, "int4", "tok_s_tg",
                 ) + f"__{fa_label}"
 
                 notes_parts = [
@@ -543,22 +317,16 @@ def parse_scoreboard_tables(html: str, backend_note: str = "CUDA") -> list[dict]
 
                 records.append({
                     "benchmark_id": bid,
-                    "model": "llama-2-7b",
-                    "device": device_id,
-                    "task": "llm",
-                    "precision": "4bit",
+                    "model_id": "llama-2-7b",
+                    "device_id": device_id,
+                    "precision": "int4",
                     "framework": "llama.cpp",
-                    "metric": "tok/s",
+                    "metric": "tok_s_tg",
                     "value": round(tg_val, 2),
-                    "unit": "tokens/sec",
-                    "batch_size": 1,
-                    "llm_setup": {
-                        "prompt_tokens": 0,
-                        "generation_tokens": 128,
-                        "quantization_format": "GGUF Q4_0",
-                    },
-                    "source": source,
-                    "provenance": provenance,
+                    "source_name": f"llama.cpp {backend_note} Scoreboard",
+                    "source_url": source["url"],
+                    "confidence": "measured",
+                    "collected_at": provenance["collected_at"],
                     "notes": "; ".join(notes_parts),
                 })
                 row_count += 1
@@ -566,7 +334,7 @@ def parse_scoreboard_tables(html: str, backend_note: str = "CUDA") -> list[dict]
         print(f"    → {row_count} records")
 
     if unmapped_gpus:
-        print(f"\n  WARNING: {len(unmapped_gpus)} unmapped GPU(s) — add to GPU_MAP + devices.yaml:")
+        print(f"\n  WARNING: {len(unmapped_gpus)} unmapped GPU(s) — add to gpu_map.py + devices.yaml:")
         for gpu in sorted(unmapped_gpus):
             print(f"    - {gpu!r}")
 
@@ -655,12 +423,8 @@ def parse_apple_scoreboard(html: str) -> list[dict]:
             chip_clean = re.sub(r"[^\w\s]", " ", chip_raw).strip().lower()
             chip_clean = re.sub(r"\s+", " ", chip_clean).strip()
 
-            # Match by longest-prefix in APPLE_CHIP_MAP
-            device_id = None
-            for key in sorted(APPLE_CHIP_MAP.keys(), key=len, reverse=True):
-                if chip_clean.startswith(key):
-                    device_id = APPLE_CHIP_MAP[key]
-                    break
+            # Resolve via shared gpu_map module (handles normalisation + lookup)
+            device_id = resolve_apple_chip(chip_raw)
 
             if device_id is None:
                 unmapped_chips.add(chip_raw)
@@ -686,33 +450,24 @@ def parse_apple_scoreboard(html: str) -> list[dict]:
         for device_id, quant_vals in best_vals.items():
             for (quant, pp_or_tg), val in quant_vals.items():
                 precision = APPLE_QUANT_PRECISION.get(quant, quant)
-                input_size = "pp512" if pp_or_tg == "pp" else "tg128"
+                metric_val = "tok_s_pp" if pp_or_tg == "pp" else "tok_s_tg"
 
                 bid = make_benchmark_id(
-                    "llama-2-7b", device_id, precision, "llama.cpp",
-                    input_size=input_size, batch_size=1,
+                    "llama_cpp", "llama-2-7b", device_id, precision, metric_val,
                 ) + "__metal"
-
-                llm_setup = (
-                    {"prompt_tokens": 512, "generation_tokens": 0, "quantization_format": quant.upper()}
-                    if pp_or_tg == "pp"
-                    else {"prompt_tokens": 0, "generation_tokens": 128, "quantization_format": quant.upper()}
-                )
 
                 records.append({
                     "benchmark_id": bid,
-                    "model": "llama-2-7b",
-                    "device": device_id,
-                    "task": "llm",
+                    "model_id": "llama-2-7b",
+                    "device_id": device_id,
                     "precision": precision,
                     "framework": "llama.cpp",
-                    "metric": "tok/s",
+                    "metric": metric_val,
                     "value": round(val, 2),
-                    "unit": "tokens/sec",
-                    "batch_size": 1,
-                    "llm_setup": llm_setup,
-                    "source": source,
-                    "provenance": provenance,
+                    "source_name": source["name"],
+                    "source_url": source["url"],
+                    "confidence": "measured",
+                    "collected_at": provenance["collected_at"],
                     "notes": (
                         f"LLaMA 7B {quant.upper()}, "
                         f"{'prompt processing' if pp_or_tg == 'pp' else 'text generation'}; "
@@ -724,7 +479,7 @@ def parse_apple_scoreboard(html: str) -> list[dict]:
         print(f"  → {row_count} records from Apple table")
 
     if unmapped_chips:
-        print(f"\n  WARNING: {len(unmapped_chips)} unmapped Apple chip(s) — add to APPLE_CHIP_MAP + devices.yaml:")
+        print(f"\n  WARNING: {len(unmapped_chips)} unmapped Apple chip(s) — add to gpu_map.py + devices.yaml:")
         for chip in sorted(unmapped_chips):
             print(f"    - {chip!r}")
 

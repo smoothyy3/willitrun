@@ -764,7 +764,7 @@ gpt-j-6b:
 
 bert-base:
   aliases: ["bert-base", "bert", "BERT"]
-  model_type: llm
+  model_type: classification
   architecture: bert
   parameters: 110000000
   weights_size_mb: 440
