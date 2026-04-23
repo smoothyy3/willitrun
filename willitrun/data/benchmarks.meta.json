@@ -1,8 +1,8 @@
 {
-  "built_at": "2026-04-23T12:34:53.397260+00:00",
-  "total_records": 1039,
+  "built_at": "2026-04-23T12:39:13.952403+00:00",
+  "total_records": 1040,
   "per_source": {
-    "geerlingguy": 54,
+    "geerlingguy": 55,
     "llama_cpp_cuda": 312,
     "localscore": 656,
     "mac_llm_bench": 74,
@@ -14,9 +14,7 @@
   },
   "collisions": 267,
   "skipped": {
-    "geerlingguy": {
-      "validation": 1
-    },
+    "geerlingguy": {},
     "llama_cpp_cuda": {},
     "localscore": {},
     "mac_llm_bench": {},

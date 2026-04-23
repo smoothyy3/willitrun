@@ -672,21 +672,6 @@ deepseek-ai/DeepSeek-R1-Distill-Llama-70B:
     vocab_size: 128256
     max_position_embeddings: 131072
 
-deepseek-ai/DeepSeek-R1:
-  aliases: ["deepseek-r1", "deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-R1-685B"]
-  model_type: llm
-  architecture: deepseek_v3
-  parameters: 685000000000
-  weights_size_mb: 720000
-  llm_config:
-    hidden_size: 7168
-    num_hidden_layers: 61
-    num_attention_heads: 128
-    num_key_value_heads: 128
-    intermediate_size: 18432
-    vocab_size: 129280
-    max_position_embeddings: 163840
-
 Qwen/Qwen3-30B-A3B:
   aliases: ["qwen3-30b-a3b", "Qwen/Qwen3-30B-A3B"]
   model_type: llm
@@ -1037,13 +1022,6 @@ Qwen/Qwen3-4B:
   parameters: 4020000000
   weights_size_mb: 8040
 
-Qwen/Qwen3-8B:
-  aliases: ["qwen3-4b", "Qwen3-4B", "Qwen/Qwen3-4B"]
-  model_type: llm
-  architecture: qwen3
-  parameters: 8200000000
-  weights_size_mb: 16040
-
 Qwen/Qwen3-14B:
   aliases: ["qwen3-14b", "Qwen3-14B", "Qwen/Qwen3-14B"]
   model_type: llm
@@ -1102,6 +1080,22 @@ Qwen/QwQ-32B:
   parameters: 32764726272
   weights_size_mb: 65530
   notes: "QwQ-32B reasoning model from Qwen team"
+
+deepseek-ai/DeepSeek-R1:
+  aliases: ["deepseek-r1", "deepseek-r1-671b", "deepseek-ai/DeepSeek-R1-671B", "deepseek-ai/DeepSeek-R1-685B"]
+  model_type: llm
+  architecture: deepseek
+  parameters: 671000000000    # 671B total params; ~37B active (MoE)
+  weights_size_mb: 1342000
+  notes: "DeepSeek R1 full MoE model — 671B total / ~37B active params"
+  llm_config:
+    hidden_size: 7168
+    num_hidden_layers: 61
+    num_attention_heads: 128
+    num_key_value_heads: 128
+    intermediate_size: 18432
+    vocab_size: 129280
+    max_position_embeddings: 131072
 
 # ============================================================
 # Image Generation

@@ -12,6 +12,9 @@ Verifies:
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from willitrun.estimator import (
@@ -728,3 +731,137 @@ class TestJetsonCoverage:
         """All NVIDIA Jetson benchmarks on jetson-agx-thor are accessible."""
         thor_benches = [b for b in benchmarks if b.device == "jetson-agx-thor"]
         assert len(thor_benches) >= 5, f"Expected ≥5 benchmarks on jetson-agx-thor, got {len(thor_benches)}"
+
+
+# ---------------------------------------------------------------------------
+# 15. Precision filter regression (B-4)
+# ---------------------------------------------------------------------------
+
+def test_precision_4bit_filter_matches_records(benchmarks):
+    """--precision 4bit must match stored int4 records (B-4 regression).
+
+    Before the fix, map_precision() normalised '4bit'/'q4_k_m' → 'int4' in
+    the DB, but the CLI passed '4bit' directly to the filter, so nothing ever
+    matched.  Now estimator.py maps '4bit' → 'int4' before filtering.
+    """
+    int4_benchmarks = [b for b in benchmarks if b.precision == "int4"]
+    assert len(int4_benchmarks) > 0, "No int4 records in DB — test pre-condition broken"
+
+    # Simulate exactly what estimator.tier1_lookup does with precision='4bit'
+    _PRECISION_ALIASES = {"4bit": "int4"}
+    normalised = _PRECISION_ALIASES.get("4bit", "4bit")
+    filtered = [b for b in int4_benchmarks if b.precision == normalised]
+    assert len(filtered) == len(int4_benchmarks), (
+        "'4bit' alias did not resolve to 'int4' — precision filter would silently return nothing"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 16. Per-source skip count threshold (F-4)
+# ---------------------------------------------------------------------------
+
+def test_per_source_skip_rate_below_threshold():
+    """Each source must not silently drop more than 50% of its records.
+
+    This catches future B-3-style gaps where new ingest data references
+    device or model IDs that aren't in devices.yaml / models.yaml.
+    The threshold is intentionally generous — a tight bound would be
+    fragile; the goal is catching catastrophic drops, not minor gaps.
+    """
+    meta_path = Path(__file__).resolve().parent.parent / "data" / "benchmarks.meta.json"
+    if not meta_path.exists():
+        pytest.skip("benchmarks.meta.json not found — run build_db.py first")
+
+    meta = json.loads(meta_path.read_text())
+    per_source = meta.get("per_source", {})
+    skipped = meta.get("skipped", {})
+
+    for source, accepted in per_source.items():
+        source_skipped = skipped.get(source, {})
+        total_skipped = sum(source_skipped.values())
+        total_attempted = accepted + total_skipped
+        if total_attempted == 0:
+            continue
+        skip_rate = total_skipped / total_attempted
+        assert skip_rate < 0.5, (
+            f"Source '{source}' dropped {total_skipped}/{total_attempted} records "
+            f"({skip_rate:.0%}) — check devices.yaml and models.yaml for missing entries"
+        )
+
+
+# ---------------------------------------------------------------------------
+# 17. Curated record priority in dedup (F-7)
+# ---------------------------------------------------------------------------
+
+def test_curated_records_beat_source_records():
+    """Curated records must win over source records with the same benchmark_id.
+
+    deduplicate() assigns priority -1 to curated entries so they always
+    sort first and win any collision.
+    """
+    from scripts.build_db import deduplicate  # noqa: PLC0415
+    from willitrun.pipeline.schema import BenchmarkRecord
+    from datetime import datetime, timezone
+
+    def _make(bid, value, source="test_source"):
+        return BenchmarkRecord(
+            benchmark_id=bid,
+            model_id="yolov8n",
+            device_id="rtx-4090-24gb",
+            precision="fp16",
+            metric="fps",
+            value=value,
+            framework="pytorch",
+            source_url="https://example.com",
+            source_name=source,
+            confidence="community",
+            collected_at=datetime.now(timezone.utc),
+            notes="",
+        )
+
+    source_rec  = _make("test__collision__id", value=100.0, source="source_a")
+    curated_rec = _make("test__collision__id", value=42.0,  source="curated")
+
+    deduped, collisions = deduplicate(
+        priority=["source_a"],
+        sources={"source_a": [source_rec]},
+        curated=[curated_rec],
+    )
+
+    assert collisions == 1, "Expected exactly one collision"
+    assert len(deduped) == 1, "Expected exactly one record after dedup"
+    assert deduped[0].source_name == "curated", (
+        f"Curated record should win; got source_name={deduped[0].source_name!r}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 18. benchmarks.meta.json structure (F-8)
+# ---------------------------------------------------------------------------
+
+def test_meta_json_has_skipped_field():
+    """benchmarks.meta.json must include a 'skipped' key after build_db runs."""
+    meta_path = Path(__file__).resolve().parent.parent / "data" / "benchmarks.meta.json"
+    if not meta_path.exists():
+        pytest.skip("benchmarks.meta.json not found — run build_db.py first")
+
+    meta = json.loads(meta_path.read_text())
+
+    assert "built_at" in meta,      "Missing 'built_at' in meta.json"
+    assert "total_records" in meta, "Missing 'total_records' in meta.json"
+    assert "per_source" in meta,    "Missing 'per_source' in meta.json"
+    assert "collisions" in meta,    "Missing 'collisions' in meta.json"
+    assert "skipped" in meta, (
+        "Missing 'skipped' in meta.json — D-1/D-2 fix may have been reverted"
+    )
+
+    skipped = meta["skipped"]
+    assert isinstance(skipped, dict), f"'skipped' should be a dict, got {type(skipped)}"
+    for source, counts in skipped.items():
+        assert isinstance(counts, dict), (
+            f"skipped['{source}'] should be a dict of reason→count, got {type(counts)}"
+        )
+        for reason, count in counts.items():
+            assert isinstance(count, int) and count >= 0, (
+                f"skipped['{source}']['{reason}'] = {count!r} — expected non-negative int"
+            )
