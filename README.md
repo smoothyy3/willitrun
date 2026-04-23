@@ -17,7 +17,7 @@ Pick any model by name, HuggingFace ID, or local file. Get a verdict, speed esti
 
 ![willitrun model check demo](assets/demo.gif)
 
-- **Real data first:** 979 measured benchmarks across NVIDIA Jetson, Apple Silicon, desktop GPUs, and more.
+- **Real data first:** 1 039 measured benchmarks across NVIDIA Jetson, Apple Silicon, desktop GPUs, and more.
 - **Inverse query:** given a device, rank the best-performing models for a task category.
 - **Edge to cloud:** Jetson, Apple Silicon, desktop GPUs, SBCs.
 - **Vision + LLMs:** exact benchmark lookup with FLOPs/memory-based estimation as fallback.

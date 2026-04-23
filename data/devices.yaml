@@ -401,6 +401,87 @@ rtx-4060-8gb:
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
 
 # ============================================================
+# Laptop GPUs: RTX 40 Series (Ada Lovelace Mobile)
+# Note: Laptop TGP varies by OEM; specs are max-TGP variants.
+# Source: TechPowerUp GPU Database, Wikipedia GeForce 40 series mobile
+# ============================================================
+
+rtx-4090-laptop-16gb:
+  name: "NVIDIA RTX 4090 Laptop 16GB"
+  vendor: nvidia
+  device_family: rtx-40
+  type: laptop_gpu
+  gpu:
+    name: "Ada Lovelace"
+    cuda_cores: 9728
+    tensor_cores: 304
+    tflops_fp16: 32.98 
+  memory:
+    total_gb: 16 
+    type: "GDDR6"
+    bandwidth_gbps: 576 
+    unified: false
+  tdp_watts: 120 
+  supported_precisions: [fp32, fp16, int8, 4bit, fp8]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
+rtx-4080-laptop-12gb:
+  name: "NVIDIA RTX 4080 Laptop 12GB"
+  vendor: nvidia
+  device_family: rtx-40
+  type: laptop_gpu
+  gpu:
+    name: "Ada Lovelace"
+    cuda_cores: 7424
+    tensor_cores: 232
+    tflops_fp16: 24.72
+  memory:
+    total_gb: 12
+    type: "GDDR6"
+    bandwidth_gbps: 432 
+    unified: false
+  tdp_watts: 110
+  supported_precisions: [fp32, fp16, int8, 4bit, fp8]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
+rtx-4070-laptop-8gb:
+  name: "NVIDIA RTX 4070 Laptop 8GB"
+  vendor: nvidia
+  device_family: rtx-40
+  type: laptop_gpu
+  gpu:
+    name: "Ada Lovelace"
+    cuda_cores: 4608
+    tensor_cores: 144
+    tflops_fp16: 15.62
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 256 
+    unified: false
+  tdp_watts: 115 
+  supported_precisions: [fp32, fp16, int8, 4bit, fp8]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
+rtx-4060-laptop-8gb:
+  name: "NVIDIA RTX 4060 Laptop 8GB"
+  vendor: nvidia
+  device_family: rtx-40
+  type: laptop_gpu
+  gpu:
+    name: "Ada Lovelace"
+    cuda_cores: 3072
+    tensor_cores: 96
+    tflops_fp16: 11.61
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 256
+    unified: false
+  tdp_watts: 115 
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
+# ============================================================
 # Desktop GPUs: RTX 30 Series (Ampere)
 # Source: Wikipedia GeForce 30 series (FP32 boost ≈ FP16 1:1)
 # ============================================================
@@ -532,6 +613,65 @@ rtx-3060-12gb:
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
 
 # ============================================================
+# Laptop GPUs: RTX 30 Series (Ampere Mobile)
+# Note: Laptop TGP varies by OEM (65–150 W); specs are max-TGP variants.
+# Source: TechPowerUp GPU Database, Wikipedia GeForce 30 series mobile
+# ============================================================
+
+rtx-3080-laptop-16gb:
+  name: "NVIDIA RTX 3080 Laptop 16GB"
+  vendor: nvidia
+  device_family: rtx-30
+  type: laptop_gpu
+  gpu:
+    name: "Ampere"
+    cuda_cores: 6144
+    tflops_fp16: 18.98 
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 448  
+    unified: false
+  tdp_watts: 115            
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+rtx-3070-laptop-8gb:
+  name: "NVIDIA RTX 3070 Laptop 8GB"
+  vendor: nvidia
+  device_family: rtx-30
+  type: laptop_gpu
+  gpu:
+    name: "Ampere"
+    cuda_cores: 5120
+    tflops_fp16: 15.97         
+  memory:
+    total_gb: 8
+    type: "GDDR6"
+    bandwidth_gbps: 448 
+    unified: false
+  tdp_watts: 115
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+rtx-3060-laptop-6gb:
+  name: "NVIDIA RTX 3060 Laptop 6GB"
+  vendor: nvidia
+  device_family: rtx-30
+  type: laptop_gpu
+  gpu:
+    name: "Ampere"
+    cuda_cores: 3840    
+  memory:
+    total_gb: 6 
+    type: "GDDR6"
+    bandwidth_gbps: 336  
+    unified: false
+  tdp_watts: 80 
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+# ============================================================
 # Desktop GPUs: RTX 20 Series (Turing)
 # Source: Wikipedia GeForce 20 series
 # ============================================================
@@ -593,6 +733,82 @@ rtx-2060s-8gb:
   supported_precisions: [fp32, fp16, int8, 4bit]
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
 
+rtx-2080-8gb:
+  name: "NVIDIA RTX 2080 8GB"
+  vendor: nvidia
+  device_family: rtx-20
+  type: desktop_gpu
+  gpu:
+    name: "Turing"
+    cuda_cores: 2944
+    tensor_cores: 368
+    tflops_fp16: 20.4   
+  memory:
+    total_gb: 8 
+    type: "GDDR6"
+    bandwidth_gbps: 448
+    unified: false
+  tdp_watts: 215
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+rtx-2080s-8gb:
+  name: "NVIDIA RTX 2080 SUPER 8GB"
+  vendor: nvidia
+  device_family: rtx-20
+  type: desktop_gpu
+  gpu:
+    name: "Turing"
+    cuda_cores: 3072
+    tensor_cores: 384
+    tflops_fp16: 22.30 
+  memory:
+    total_gb: 8  
+    type: "GDDR6"
+    bandwidth_gbps: 496 
+    unified: false
+  tdp_watts: 250 
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+rtx-2070-8gb:
+  name: "NVIDIA RTX 2070 8GB"
+  vendor: nvidia
+  device_family: rtx-20
+  type: desktop_gpu
+  gpu:
+    name: "Turing"
+    cuda_cores: 2304
+    tensor_cores: 288
+    tflops_fp16: 14.93          
+  memory:
+    total_gb: 8             
+    type: "GDDR6"
+    bandwidth_gbps: 448  
+    unified: false
+  tdp_watts: 175
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+rtx-2060-6gb:
+  name: "NVIDIA RTX 2060 6GB"
+  vendor: nvidia
+  device_family: rtx-20
+  type: desktop_gpu
+  gpu:
+    name: "Turing"
+    cuda_cores: 1920
+    tensor_cores: 240
+    tflops_fp16: 12.90
+  memory:
+    total_gb: 6
+    type: "GDDR6"
+    bandwidth_gbps: 336
+    unified: false
+  tdp_watts: 160             
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
 # ============================================================
 # Desktop GPUs: GTX 10/16 Series (Pascal/Turing, no tensor cores)
 # Source: Wikipedia GeForce 10/16 series
@@ -616,6 +832,24 @@ gtx-1080ti-11gb:
   tdp_watts: 250
   supported_precisions: [fp32, fp16, 4bit]
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+gtx-1080-8gb:
+  name: "NVIDIA GTX 1080 8GB"
+  vendor: nvidia
+  device_family: gtx-10
+  type: desktop_gpu
+  gpu:
+    name: "Pascal"
+    cuda_cores: 2560
+    tflops_fp32: 8.873 
+  memory:
+    total_gb: 8
+    type: "GDDR5X"
+    bandwidth_gbps: 320.3
+    unified: false
+  tdp_watts: 180
+  supported_precisions: [fp32, fp16, 4bit]
+  supported_runtimes: [pytorch, onnxruntime, llama.cpp]
 
 gtx-1070ti-8gb:
   name: "NVIDIA GTX 1070 Ti 8GB"
@@ -707,6 +941,24 @@ gtx-1660-6gb:
   supported_precisions: [fp32, fp16, 4bit]
   supported_runtimes: [pytorch, onnxruntime, llama.cpp]
 
+gtx-1650-4gb:
+  name: "NVIDIA GTX 1650 4GB"
+  vendor: nvidia
+  device_family: gtx-16
+  type: desktop_gpu
+  gpu:
+    name: "Turing"
+    cuda_cores: 896
+    tflops_fp16: 5.967
+  memory:
+    total_gb: 4
+    type: "GDDR5"
+    bandwidth_gbps: 128.1
+    unified: false
+  tdp_watts: 75
+  supported_precisions: [fp32, fp16, 4bit]
+  supported_runtimes: [pytorch, onnxruntime, llama.cpp]
+
 # ============================================================
 # Titan Series
 # Source: Wikipedia Volta arch (Titan V), Turing (Titan RTX)
@@ -790,6 +1042,25 @@ h100-80gb:
     unified: false
   tdp_watts: 350
   supported_precisions: [fp32, fp16, bf16, int8, 4bit, fp8]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
+a100-40gb:
+  name: "NVIDIA A100 40GB"
+  vendor: nvidia
+  device_family: ampere-dc
+  type: server_gpu
+  gpu:
+    name: "Ampere"
+    cuda_cores: 6912
+    tensor_cores: 432
+    tflops_fp16: 77.97
+  memory:
+    total_gb: 40
+    type: "HBM2"
+    bandwidth_gbps: 1555
+    unified: false
+  tdp_watts: 250
+  supported_precisions: [fp32, fp16, bf16, int8, 4bit]
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
 
 a100-80gb:
@@ -1111,6 +1382,25 @@ tesla-p100-16gb:
   supported_precisions: [fp32, fp16, 4bit]
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
 
+v100-32gb:
+  name: "NVIDIA V100 32GB"
+  vendor: nvidia
+  device_family: volta-dc
+  type: server_gpu
+  gpu:
+    name: "Volta"
+    cuda_cores: 5120
+    tensor_cores: 640
+    tflops_fp16: 33.32
+  memory:
+    total_gb: 32
+    type: "HBM2"
+    bandwidth_gbps: 868.4
+    unified: false
+  tdp_watts: 250
+  supported_precisions: [fp32, fp16, int8, 4bit]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
+
 v100-16gb:
   name: "NVIDIA V100 16GB"
   vendor: nvidia
@@ -1149,6 +1439,25 @@ t4-16gb:
   tdp_watts: 70
   supported_precisions: [fp32, fp16, int8, 4bit]
   supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp]
+
+l4-24gb:
+  name: "NVIDIA L4 24GB"
+  vendor: nvidia
+  device_family: ada-dc
+  type: server_gpu
+  gpu:
+    name: "Ada Lovelace"
+    cuda_cores: 7680
+    tensor_cores: 240
+    tflops_fp16: 30.29
+  memory:
+    total_gb: 24
+    type: "GDDR6"
+    bandwidth_gbps: 300.1
+    unified: false
+  tdp_watts: 72
+  supported_precisions: [fp32, fp16, bf16, int8, 4bit, fp8]
+  supported_runtimes: [pytorch, tensorrt, onnxruntime, llama.cpp, vllm]
 
 a30-24gb:
   name: "NVIDIA A30 24GB"
