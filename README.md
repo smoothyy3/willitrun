@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/willitrun)](https://pypi.org/project/willitrun/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/smoothyy3/willitrun/ci.yml?branch=main)](https://github.com/smoothyy3/willitrun/actions)
+[![HuggingFace Space](https://img.shields.io/badge/🤗%20HuggingFace-Try%20it%20online-yellow)](https://huggingface.co/spaces/jonasmoe/willitrun)
 
 ### Find the best models for your device
 
@@ -23,6 +24,12 @@ Pick any model by name, HuggingFace ID, or local file. Get a verdict, speed esti
 - **Vision + LLMs:** exact benchmark lookup with FLOPs/memory-based estimation as fallback.
 - **MoE-aware:** distinguishes total vs active parameters for memory and speed estimation.
 - **CLI-first:** fast, scriptable, offline-capable once the DB is installed.
+
+## Try it online
+
+**No install needed:** [huggingface.co/spaces/jonasmoe/willitrun](https://huggingface.co/spaces/jonasmoe/willitrun)
+
+Check any model against any device, or find the best models for your hardware. Backed by the same benchmark database as the CLI.
 
 ## Quick Start
 
